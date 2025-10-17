@@ -1,0 +1,17 @@
+fixer:
+  url: https://data.fixer.io/api/latest
+  api-key: ${FIXER_API_KEY}
+collector:
+  interval: 3600000
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/currency_gateway
+    username: ${DB_USERNAME:gateway}
+    password: ${DB_PASSWORD:gateway}
+  jpa:
+    hibernate:
+      ddl-auto: update
+rabbitmq:
+  host: localhost
+  port: 5672
+  exchange: currency.statistics
