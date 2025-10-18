@@ -12,6 +12,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +36,25 @@ class ExchangeRateRepositoryTest {
 
         assertThat(latest.getRate()).isEqualByComparingTo("0.9100");
         assertThat(latest.getRecordedAt()).isEqualTo(now);
+    }
+
+    @Test
+    void findRatesWithinRangeOrderedAscending() {
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        ExchangeRate older = new ExchangeRate("USD", "CAD", new BigDecimal("1.2500"), now.minusSeconds(120));
+        ExchangeRate middle = new ExchangeRate("USD", "CAD", new BigDecimal("1.2600"), now.minusSeconds(60));
+        ExchangeRate newer = new ExchangeRate("USD", "CAD", new BigDecimal("1.2700"), now);
+        repository.save(PersistenceMappers.toEntity(older));
+        repository.save(PersistenceMappers.toEntity(middle));
+        repository.save(PersistenceMappers.toEntity(newer));
+
+        List<ExchangeRateEntity> results = repository
+                .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(
+                        "USD", "CAD", now.minusSeconds(180), now.plusSeconds(1));
+
+        assertThat(results).hasSize(3);
+        assertThat(results.get(0).getRecordedAt()).isEqualTo(older.timestamp());
+        assertThat(results.get(2).getRecordedAt()).isEqualTo(newer.timestamp());
     }
 
     @Test
