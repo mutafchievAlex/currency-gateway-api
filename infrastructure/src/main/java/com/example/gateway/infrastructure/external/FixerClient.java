@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 public class FixerClient implements ExternalRatesClient {
 
     private final RestClient restClient;
-    private final String accessKey;
+    private final String apiKey;
 
     public FixerClient(RestClient.Builder builder,
-                       @Value("${fixer.base-url:https://data.fixer.io}") String baseUrl,
-                       @Value("${fixer.access-key}") String accessKey) {
+                       @Value("${fixer.url:https://data.fixer.io/api}") String baseUrl,
+                       @Value("${fixer.api-key}") String apiKey) {
         this.restClient = builder.baseUrl(Objects.requireNonNull(baseUrl, "baseUrl must not be null")).build();
-        this.accessKey = Objects.requireNonNull(accessKey, "accessKey must not be null");
+        this.apiKey = Objects.requireNonNull(apiKey, "apiKey must not be null");
     }
 
     @Override
@@ -46,8 +46,8 @@ public class FixerClient implements ExternalRatesClient {
 
         FixerLatestResponse response = restClient.get()
                 .uri(uriBuilder -> {
-                    uriBuilder.path("/api/latest")
-                            .queryParam("access_key", accessKey)
+                    uriBuilder.path("/latest")
+                            .queryParam("access_key", apiKey)
                             .queryParam("base", baseCurrency);
                     if (!normalizedTargets.isEmpty()) {
                         uriBuilder.queryParam("symbols", String.join(",", normalizedTargets));

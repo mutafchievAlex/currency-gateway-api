@@ -40,7 +40,7 @@ public abstract class IntegrationTestSupport {
         registry.add("spring.rabbitmq.template.exchange", () -> "statistics.integration");
 
         registry.add("spring.task.scheduling.enabled", () -> "false");
-        registry.add("fixer.access-key", () -> "test-access-key");
-        registry.add("fixer.base-url", () -> "http://localhost");
+        registry.add("fixer.api-key", () -> "test-access-key");
+        registry.add("fixer.url", () -> "http://localhost/api");
     }
 }
