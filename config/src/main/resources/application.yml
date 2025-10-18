@@ -1,5 +1,5 @@
 fixer:
-  url: https://data.fixer.io/api/latest
+  url: https://data.fixer.io/api
   api-key: ${FIXER_API_KEY}
 collector:
   interval: 3600000
