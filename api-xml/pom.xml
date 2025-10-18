@@ -6,10 +6,13 @@
         <groupId>com.example.gateway</groupId>
         <artifactId>currency-gateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
     </parent>
 
     <artifactId>api-xml</artifactId>
     <packaging>pom</packaging>
+
+    <name>Currency Gateway :: API XML</name>
 
     <dependencies>
         <dependency>

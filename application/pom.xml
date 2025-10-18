@@ -6,10 +6,13 @@
         <groupId>com.example.gateway</groupId>
         <artifactId>currency-gateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
     </parent>
 
     <artifactId>application</artifactId>
     <packaging>pom</packaging>
+
+    <name>Currency Gateway :: Application</name>
 
     <dependencies>
         <dependency>
@@ -21,6 +24,10 @@
             <groupId>com.example.gateway</groupId>
             <artifactId>common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
     </dependencies>
 </project>
