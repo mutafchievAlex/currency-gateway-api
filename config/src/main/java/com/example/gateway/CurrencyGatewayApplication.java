@@ -1,15 +1,12 @@
 package com.example.gateway;
 
-/**
- * Entry point placeholder for the Currency Gateway application.
- */
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class CurrencyGatewayApplication {
 
-    private CurrencyGatewayApplication() {
-        // Utility class
-    }
-
     public static void main(String[] args) {
-        // Application bootstrap placeholder
+        SpringApplication.run(CurrencyGatewayApplication.class, args);
     }
 }

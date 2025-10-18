@@ -14,15 +14,18 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>Currency Gateway</name>
+    <description>Currency Gateway multi-module project</description>
+
     <modules>
         <module>common</module>
         <module>domain</module>
         <module>application</module>
         <module>infrastructure</module>
-        <module>config</module>
         <module>scheduler</module>
         <module>api-json</module>
         <module>api-xml</module>
+        <module>config</module>
         <module>test-support</module>
     </modules>
 

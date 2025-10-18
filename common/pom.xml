@@ -6,8 +6,11 @@
         <groupId>com.example.gateway</groupId>
         <artifactId>currency-gateway</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
     </parent>
 
     <artifactId>common</artifactId>
     <packaging>pom</packaging>
+
+    <name>Currency Gateway :: Common</name>
 </project>

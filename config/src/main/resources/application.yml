@@ -6,12 +6,18 @@ collector:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/currency_gateway
-    username: ${DB_USERNAME:gateway}
-    password: ${DB_PASSWORD:gateway}
+    username: ${DB_USERNAME:currency}
+    password: ${DB_PASSWORD:currency}
   jpa:
     hibernate:
       ddl-auto: update
-rabbitmq:
-  host: localhost
-  port: 5672
-  exchange: currency.statistics
+    properties:
+      hibernate:
+        format_sql: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    template:
+      exchange: ${RABBITMQ_EXCHANGE:currency.statistics}
