@@ -2,6 +2,7 @@ package com.example.gateway.config;
 
 import com.example.gateway.domain.StatisticsEntry;
 import com.example.gateway.infrastructure.messaging.StatisticsPublisher;
+import com.example.gateway.testsupport.IntegrationTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Binding;
@@ -16,11 +17,6 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,22 +24,9 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(
-        classes = {RabbitMQConfig.class, RabbitMQConfigIntegrationTest.TestConfig.class},
-        properties = "spring.rabbitmq.template.exchange=statistics.integration"
+        classes = {RabbitMQConfig.class, RabbitMQConfigIntegrationTest.TestConfig.class}
 )
-@Testcontainers(disabledWithoutDocker = true)
-class RabbitMQConfigIntegrationTest {
-
-    @Container
-    static final RabbitMQContainer rabbitMqContainer = new RabbitMQContainer("rabbitmq:3.13.0");
-
-    @DynamicPropertySource
-    static void registerRabbitProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.rabbitmq.host", rabbitMqContainer::getHost);
-        registry.add("spring.rabbitmq.port", rabbitMqContainer::getAmqpPort);
-        registry.add("spring.rabbitmq.username", rabbitMqContainer::getAdminUsername);
-        registry.add("spring.rabbitmq.password", rabbitMqContainer::getAdminPassword);
-    }
+class RabbitMQConfigIntegrationTest extends IntegrationTestSupport {
 
     private final RabbitTemplate rabbitTemplate;
     private final TopicExchange topicExchange;
