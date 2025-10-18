@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>config</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Currency Gateway :: Configuration</name>
 
