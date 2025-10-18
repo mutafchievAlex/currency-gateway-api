@@ -3,6 +3,11 @@ fixer:
   api-key: ${FIXER_API_KEY}
 collector:
   interval: 3600000
+  base-currency: USD
+  target-currencies:
+    - EUR
+    - GBP
+    - JPY
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/currency_gateway
