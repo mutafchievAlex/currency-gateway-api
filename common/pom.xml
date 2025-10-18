@@ -9,5 +9,5 @@
     </parent>
 
     <artifactId>common</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 </project>

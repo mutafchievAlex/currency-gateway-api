@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>api-xml</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

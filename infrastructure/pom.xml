@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>infrastructure</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
