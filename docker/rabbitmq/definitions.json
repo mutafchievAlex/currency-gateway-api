@@ -1,0 +1,21 @@
+{
+  "users": [],
+  "vhosts": [
+    { "name": "/" }
+  ],
+  "permissions": [],
+  "topic_permissions": [],
+  "queues": [],
+  "exchanges": [
+    {
+      "name": "statistics.exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": []
+}
