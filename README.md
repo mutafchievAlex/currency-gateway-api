@@ -39,6 +39,22 @@ mvn -DskipTests package
 
 ### Run
 
+#### Start RabbitMQ locally
+
+The application expects a RabbitMQ broker to be available. A Docker setup is
+provided under `docker/` to spin up a dedicated instance pre-configured with
+the topic exchange used by the gateway:
+
+```bash
+docker compose -f docker/docker-compose.rabbitmq.yml up --build
+```
+
+The broker exposes AMQP on `localhost:5672` and the management UI on
+`http://localhost:15672` (default credentials `gateway` / `gateway`). You can
+override credentials and the virtual host with the `RABBITMQ_USERNAME`,
+`RABBITMQ_PASSWORD`, and `RABBITMQ_VHOST` environment variables when starting
+the compose stack.
+
 The Spring Boot application entry point is located in the `config` module:
 
 ```bash
