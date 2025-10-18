@@ -13,4 +13,12 @@
     <packaging>jar</packaging>
 
     <name>Currency Gateway :: Domain</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
