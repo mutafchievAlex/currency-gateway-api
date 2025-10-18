@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>api-json</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Currency Gateway :: API JSON</name>
 

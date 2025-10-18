@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>common</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
 
     <name>Currency Gateway :: Common</name>
 </project>
