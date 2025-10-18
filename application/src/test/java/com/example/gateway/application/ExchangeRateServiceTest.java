@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -30,10 +32,12 @@ class ExchangeRateServiceTest {
     private ExchangeRateService service;
 
     private ExchangeRate rate;
+    private Instant timestamp;
 
     @BeforeEach
     void setUp() {
-        rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), Instant.parse("2024-01-01T00:00:00Z"));
+        timestamp = Instant.parse("2024-01-01T00:00:00Z");
+        rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), timestamp);
     }
 
     @Test
@@ -57,5 +61,27 @@ class ExchangeRateServiceTest {
 
         assertFalse(persisted);
         verify(repository, never()).save(ArgumentMatchers.any());
+    }
+
+    @Test
+    void findsLatestRate() {
+        when(repository.findLatestByPair("USD", "EUR")).thenReturn(Optional.of(rate));
+
+        Optional<ExchangeRate> latest = service.findLatest("usd", "eur");
+
+        assertTrue(latest.isPresent());
+        assertTrue(latest.map(ExchangeRate::timestamp).filter(timestamp::equals).isPresent());
+    }
+
+    @Test
+    void findsHistoryWithinRange() {
+        Instant start = timestamp.minus(1, ChronoUnit.DAYS);
+        Instant end = timestamp.plus(1, ChronoUnit.DAYS);
+        when(repository.findWithinRange("USD", "EUR", start, end)).thenReturn(List.of(rate));
+
+        List<ExchangeRate> history = service.findHistory("usd", "eur", start, end);
+
+        assertFalse(history.isEmpty());
+        assertTrue(history.stream().anyMatch(entry -> entry.timestamp().equals(timestamp)));
     }
 }

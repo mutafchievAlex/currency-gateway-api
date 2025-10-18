@@ -4,6 +4,7 @@ import com.example.gateway.infrastructure.persistence.entity.ExchangeRateEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRateEntity, Long> {
@@ -14,4 +15,9 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRateEntity
     Optional<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndRecordedAt(String baseCurrency,
                                                                                   String targetCurrency,
                                                                                   Instant recordedAt);
+
+    List<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(String baseCurrency,
+                                                                                                         String targetCurrency,
+                                                                                                         Instant start,
+                                                                                                         Instant end);
 }

@@ -8,6 +8,7 @@ import com.example.gateway.infrastructure.persistence.repository.ExchangeRateRep
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -29,5 +30,20 @@ public class JpaExchangeRateRepositoryAdapter implements ExchangeRateRepositoryP
     public ExchangeRate save(ExchangeRate rate) {
         ExchangeRateEntity saved = repository.save(PersistenceMappers.toEntity(rate));
         return PersistenceMappers.toDomain(saved);
+    }
+
+    @Override
+    public Optional<ExchangeRate> findLatestByPair(String baseCurrency, String targetCurrency) {
+        return repository.findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc(baseCurrency, targetCurrency)
+                .map(PersistenceMappers::toDomain);
+    }
+
+    @Override
+    public List<ExchangeRate> findWithinRange(String baseCurrency, String targetCurrency, Instant start, Instant end) {
+        return repository
+                .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(baseCurrency, targetCurrency, start, end)
+                .stream()
+                .map(PersistenceMappers::toDomain)
+                .toList();
     }
 }
