@@ -1,12 +1,12 @@
 package com.example.gateway.api.json;
 
 import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
+import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.ExchangeRate;
 import com.example.gateway.domain.RequestLog;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 
 final class JsonApiMapper {
 
@@ -38,7 +38,7 @@ final class JsonApiMapper {
         if (currency == null) {
             return null;
         }
-        return currency.trim().toUpperCase(Locale.ROOT);
+        return ValidationUtils.normalizeCurrencyCode(currency, "currency");
     }
 
     private static String normalize(String value) {

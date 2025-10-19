@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -83,5 +84,20 @@ class ExchangeRateServiceTest {
 
         assertFalse(history.isEmpty());
         assertTrue(history.stream().anyMatch(entry -> entry.timestamp().equals(timestamp)));
+    }
+
+    @Test
+    void findLatestRejectsInvalidCurrencyCode() {
+        assertThrows(IllegalArgumentException.class, () -> service.findLatest("US1", "eur"));
+        verify(repository, never()).findLatestByPair(ArgumentMatchers.any(), ArgumentMatchers.any());
+    }
+
+    @Test
+    void findHistoryRejectsInvalidCurrencyCode() {
+        Instant start = timestamp.minus(1, ChronoUnit.DAYS);
+        Instant end = timestamp.plus(1, ChronoUnit.DAYS);
+
+        assertThrows(IllegalArgumentException.class, () -> service.findHistory("usd", "EU", start, end));
+        verify(repository, never()).findWithinRange(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 }
