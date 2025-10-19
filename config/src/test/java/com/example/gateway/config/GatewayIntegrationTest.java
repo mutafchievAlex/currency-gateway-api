@@ -1,9 +1,9 @@
 package com.example.gateway.config;
 
 import com.example.gateway.CurrencyGatewayApplication;
-import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
-import com.example.gateway.api.xml.generated.model.ExchangeRateCommandRequest;
-import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
+import com.example.gateway.api.generated.model.ApiErrorRepresentation;
+import com.example.gateway.api.generated.model.ExchangeRateHistoryRepresentation;
+import com.example.gateway.api.generated.model.ExchangeRateRepresentation;
 import com.example.gateway.application.StatisticsCollectorService;
 import com.example.gateway.domain.StatisticsEntry;
 import com.example.gateway.infrastructure.messaging.StatisticsPublisher;
@@ -12,9 +12,6 @@ import com.example.gateway.infrastructure.persistence.repository.ExchangeRateRep
 import com.example.gateway.infrastructure.persistence.repository.RequestLogRepository;
 import com.example.gateway.infrastructure.persistence.repository.StatisticsRepository;
 import com.example.gateway.testsupport.IntegrationTestSupport;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Binding;
@@ -31,9 +28,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -48,11 +45,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = CurrencyGatewayApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class GatewayIntegrationTest extends IntegrationTestSupport {
-
-    private final XmlMapper xmlMapper = XmlMapper.builder()
-            .addModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .build();
 
     @Autowired
     private ExchangeRateRepository exchangeRateRepository;
@@ -94,13 +86,13 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.90"), now.minusSeconds(60)));
         exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.95"), now));
 
-        String uri = UriComponentsBuilder.fromPath("/json_api/current")
+        String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
                 .queryParam("requestId", "json-req-1")
                 .queryParam("baseCurrency", "USD")
                 .queryParam("targetCurrency", "EUR")
                 .toUriString();
 
-        ResponseEntity<ExchangeRateResponse> response = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
+        ResponseEntity<ExchangeRateRepresentation> response = restTemplate.getForEntity(uri, ExchangeRateRepresentation.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
@@ -121,35 +113,33 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.92"), second));
         exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.93"), third));
 
-        ExchangeRateCommandRequest command = new ExchangeRateCommandRequest();
-        command.setRequestId("xml-req-1");
-        command.setType(ExchangeRateCommandRequest.TypeEnum.HISTORY);
-        command.setBaseCurrency("USD");
-        command.setTargetCurrency("EUR");
-        command.setStart(first.minusSeconds(5));
-        command.setEnd(third.plusSeconds(5));
-
-        String payload = xmlMapper.writeValueAsString(command);
+        String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/history")
+                .queryParam("requestId", "xml-req-1")
+                .queryParam("baseCurrency", "usd")
+                .queryParam("targetCurrency", "eur")
+                .queryParam("start", first.minusSeconds(5))
+                .queryParam("end", third.plusSeconds(5))
+                .toUriString();
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_XML);
         headers.setAccept(List.of(MediaType.APPLICATION_XML));
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "/xml_api/command",
-                new HttpEntity<>(payload, headers),
-                String.class
+        ResponseEntity<ExchangeRateHistoryRepresentation> response = restTemplate.exchange(
+                uri,
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                ExchangeRateHistoryRepresentation.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(requestLogRepository.findByRequestId("xml-req-1")).isPresent();
 
-        ExchangeRateHistoryResponse historyResponse = xmlMapper.readValue(response.getBody(), ExchangeRateHistoryResponse.class);
-        List<com.example.gateway.api.xml.generated.model.ExchangeRateResponse> rates = historyResponse.getRates();
-        assertThat(rates).hasSize(3);
-        assertThat(rates.get(0).getRate()).isEqualByComparingTo("0.91");
-        assertThat(rates.get(1).getRate()).isEqualByComparingTo("0.92");
-        assertThat(rates.get(2).getRate()).isEqualByComparingTo("0.93");
+        ExchangeRateHistoryRepresentation historyResponse = response.getBody();
+        assertThat(historyResponse).isNotNull();
+        assertThat(historyResponse.getRates()).hasSize(3);
+        assertThat(historyResponse.getRates().get(0).getRate()).isEqualByComparingTo("0.91");
+        assertThat(historyResponse.getRates().get(1).getRate()).isEqualByComparingTo("0.92");
+        assertThat(historyResponse.getRates().get(2).getRate()).isEqualByComparingTo("0.93");
     }
 
     @Test
@@ -157,16 +147,16 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         exchangeRateRepository.save(new ExchangeRateEntity("USD", "GBP", new BigDecimal("0.80"), now));
 
-        String uri = UriComponentsBuilder.fromPath("/json_api/current")
+        String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
                 .queryParam("requestId", "dup-req-1")
                 .queryParam("baseCurrency", "USD")
                 .queryParam("targetCurrency", "GBP")
                 .toUriString();
 
-        ResponseEntity<ExchangeRateResponse> firstResponse = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
+        ResponseEntity<ExchangeRateRepresentation> firstResponse = restTemplate.getForEntity(uri, ExchangeRateRepresentation.class);
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<ProblemDetail> duplicateResponse = restTemplate.getForEntity(uri, ProblemDetail.class);
+        ResponseEntity<ApiErrorRepresentation> duplicateResponse = restTemplate.getForEntity(uri, ApiErrorRepresentation.class);
         assertThat(duplicateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(duplicateResponse.getBody()).isNotNull();
         assertThat(duplicateResponse.getBody().getDetail()).contains("dup-req-1");

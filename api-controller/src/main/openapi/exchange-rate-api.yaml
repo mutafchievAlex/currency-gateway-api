@@ -1,0 +1,196 @@
+openapi: 3.0.3
+info:
+  title: Currency Gateway Unified API
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /api/exchange-rates/current:
+    get:
+      tags:
+        - ExchangeRates
+      operationId: getCurrentExchangeRate
+      parameters:
+        - name: requestId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: baseCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z]{3}$'
+        - name: targetCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z]{3}$'
+      responses:
+        '200':
+          description: Current exchange rate for the requested currency pair.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRate'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ExchangeRate'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Exchange rate not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Duplicate request identifier detected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/exchange-rates/history:
+    get:
+      tags:
+        - ExchangeRates
+      operationId: getExchangeRateHistory
+      parameters:
+        - name: requestId
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: baseCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z]{3}$'
+        - name: targetCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z]{3}$'
+        - name: start
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: end
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Historical exchange rates for the requested interval.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateHistory'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateHistory'
+        '400':
+          description: Invalid request parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: Exchange rate history not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: Duplicate request identifier detected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    ApiError:
+      type: object
+      required:
+        - title
+        - detail
+        - status
+      properties:
+        title:
+          type: string
+        detail:
+          type: string
+        status:
+          type: integer
+          format: int32
+      xml:
+        name: error
+    ExchangeRate:
+      type: object
+      required:
+        - baseCurrency
+        - targetCurrency
+        - rate
+        - timestamp
+      properties:
+        baseCurrency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        targetCurrency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        rate:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+      xml:
+        name: exchangeRate
+    ExchangeRateHistory:
+      type: object
+      required:
+        - rates
+      properties:
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExchangeRate'
+          xml:
+            name: rate
+            wrapped: true
+      xml:
+        name: exchangeRateHistory

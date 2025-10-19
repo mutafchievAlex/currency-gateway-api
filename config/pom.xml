@@ -32,12 +32,7 @@
         </dependency>
         <dependency>
             <groupId>com.example.gateway</groupId>
-            <artifactId>api-json</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.example.gateway</groupId>
-            <artifactId>api-xml</artifactId>
+            <artifactId>api-controller</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
