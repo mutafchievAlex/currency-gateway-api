@@ -1,0 +1,158 @@
+openapi: 3.0.3
+info:
+  title: Currency Gateway JSON API
+  version: 1.0.0
+  description: JSON endpoints for exchange rate data
+paths:
+  /api/exchange-rates/current:
+    get:
+      tags:
+        - JsonExchangeRates
+      operationId: getCurrentExchangeRate
+      summary: Get the latest exchange rate for a currency pair
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/BaseCurrency'
+        - $ref: '#/components/parameters/TargetCurrency'
+      responses:
+        '200':
+          description: Successful JSON exchange rate response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/exchange-rates/history:
+    get:
+      tags:
+        - JsonExchangeRates
+      operationId: getExchangeRateHistory
+      summary: Get historical exchange rates for a currency pair
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/BaseCurrency'
+        - $ref: '#/components/parameters/TargetCurrency'
+        - $ref: '#/components/parameters/Start'
+        - $ref: '#/components/parameters/End'
+      responses:
+        '200':
+          description: Historical exchange rate response in JSON
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRateHistoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  parameters:
+    RequestId:
+      name: requestId
+      in: query
+      required: true
+      schema:
+        type: string
+      description: Unique identifier for the request
+    BaseCurrency:
+      name: baseCurrency
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 3
+      description: ISO-4217 currency code representing the base currency
+    TargetCurrency:
+      name: targetCurrency
+      in: query
+      required: true
+      schema:
+        type: string
+        minLength: 3
+        maxLength: 3
+      description: ISO-4217 currency code representing the target currency
+    Start:
+      name: start
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive starting timestamp for history lookup
+    End:
+      name: end
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+      description: Inclusive ending timestamp for history lookup
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    NotFound:
+      description: Requested exchange rate not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    Conflict:
+      description: Duplicate request identifier detected
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+  schemas:
+    ExchangeRateResponse:
+      type: object
+      required:
+        - baseCurrency
+        - targetCurrency
+        - rate
+        - timestamp
+      properties:
+        baseCurrency:
+          type: string
+        targetCurrency:
+          type: string
+        rate:
+          type: string
+          pattern: "^-?\\d+(?:\\.\\d+)?$"
+        timestamp:
+          type: string
+          format: date-time
+    ExchangeRateHistoryResponse:
+      type: object
+      required:
+        - rates
+      properties:
+        rates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExchangeRateResponse'
+    ApiError:
+      type: object
+      required:
+        - title
+        - status
+        - detail
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+          format: int32
+        detail:
+          type: string

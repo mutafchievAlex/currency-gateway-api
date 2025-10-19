@@ -55,22 +55,40 @@
                 <artifactId>openapi-generator-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>generate-unified-api</id>
+                        <id>generate-json-api</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/openapi/exchange-rate-api.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/openapi/exchange-rate-json-api.yaml</inputSpec>
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
-                            <modelPackage>com.example.gateway.api.generated.model</modelPackage>
-                            <apiPackage>com.example.gateway.api.generated.api</apiPackage>
+                            <modelPackage>com.example.gateway.api.json.generated.model</modelPackage>
+                            <apiPackage>com.example.gateway.api.json.generated.api</apiPackage>
                             <interfaceOnly>true</interfaceOnly>
                             <generateSupportingFiles>false</generateSupportingFiles>
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <dateLibrary>java8</dateLibrary>
-                                <modelNameSuffix>Representation</modelNameSuffix>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-xml-api</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/openapi/exchange-rate-xml-api.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <library>spring-boot</library>
+                            <modelPackage>com.example.gateway.api.xml.generated.model</modelPackage>
+                            <apiPackage>com.example.gateway.api.xml.generated.api</apiPackage>
+                            <interfaceOnly>true</interfaceOnly>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <dateLibrary>java8</dateLibrary>
                             </configOptions>
                         </configuration>
                     </execution>

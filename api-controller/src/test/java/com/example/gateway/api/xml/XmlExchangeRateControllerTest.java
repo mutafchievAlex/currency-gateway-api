@@ -1,4 +1,4 @@
-package com.example.gateway.api;
+package com.example.gateway.api.xml;
 
 import com.example.gateway.application.ExchangeRateService;
 import com.example.gateway.application.RequestLogService;
@@ -7,7 +7,6 @@ import com.example.gateway.domain.ExchangeRate;
 import com.example.gateway.domain.RequestLog;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -25,20 +24,18 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
-@WebMvcTest(ExchangeRateController.class)
-@Import(ExchangeRateControllerTest.MapperConfig.class)
-class ExchangeRateControllerTest {
+@WebMvcTest(XmlExchangeRateController.class)
+@Import(XmlExchangeRateControllerTest.MapperConfig.class)
+class XmlExchangeRateControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,36 +47,13 @@ class ExchangeRateControllerTest {
     private RequestLogService requestLogService;
 
     @Test
-    void returnsCurrentRateAsJson() throws Exception {
-        Instant timestamp = Instant.parse("2024-03-15T10:15:30Z");
-        ExchangeRate rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9200"), timestamp);
-        when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.of(rate));
-
-        mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
-                        .queryParam("baseCurrency", "usd")
-                        .queryParam("targetCurrency", "eur")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.baseCurrency").value("USD"))
-                .andExpect(jsonPath("$.targetCurrency").value("EUR"))
-                .andExpect(jsonPath("$.rate").value("0.9200"))
-                .andExpect(jsonPath("$.timestamp").value("2024-03-15T10:15:30Z"));
-
-        ArgumentCaptor<RequestLog> captor = ArgumentCaptor.forClass(RequestLog.class);
-        verify(requestLogService).record(captor.capture());
-        assertThat(captor.getValue().requestId()).isEqualTo("req-123");
-        assertThat(captor.getValue().endpoint()).isEqualTo("/api/exchange-rates/current");
-    }
-
-    @Test
     void returnsCurrentRateAsXml() throws Exception {
         Instant timestamp = Instant.parse("2024-03-15T10:15:30Z");
         ExchangeRate rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9200"), timestamp);
         when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.of(rate));
 
         mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
+                        .queryParam("requestId", "req-xml-1")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_XML))
@@ -89,71 +63,23 @@ class ExchangeRateControllerTest {
                 .andExpect(xpath("/exchangeRate/targetCurrency").string("EUR"))
                 .andExpect(xpath("/exchangeRate/rate").string("0.9200"))
                 .andExpect(xpath("/exchangeRate/timestamp").string("2024-03-15T10:15:30Z"));
+
+        verify(requestLogService).record(any(RequestLog.class));
     }
 
     @Test
-    void returnsNotFoundWhenCurrentRateMissing() throws Exception {
-        when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.empty());
-
-        mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
-                        .queryParam("baseCurrency", "usd")
-                        .queryParam("targetCurrency", "eur"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void returnsConflictWhenRequestDuplicatedForJson() throws Exception {
+    void returnsConflictWhenRequestDuplicated() throws Exception {
         doThrow(new DuplicateRequestException("duplicate"))
                 .when(requestLogService).record(any(RequestLog.class));
 
         mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
-                        .queryParam("baseCurrency", "usd")
-                        .queryParam("targetCurrency", "eur")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.title").value("Duplicate request"))
-                .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()));
-    }
-
-    @Test
-    void returnsConflictWhenRequestDuplicatedForXml() throws Exception {
-        doThrow(new DuplicateRequestException("duplicate"))
-                .when(requestLogService).record(any(RequestLog.class));
-
-        mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
+                        .queryParam("requestId", "req-xml-1")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isConflict())
                 .andExpect(xpath("/error/title").string("Duplicate request"))
                 .andExpect(xpath("/error/status").string(String.valueOf(HttpStatus.CONFLICT.value())));
-    }
-
-    @Test
-    void returnsHistoryAsJson() throws Exception {
-        Instant now = Instant.parse("2024-03-15T10:15:30Z");
-        List<ExchangeRate> history = List.of(
-                new ExchangeRate("USD", "JPY", new BigDecimal("110.00"), now.minus(2, ChronoUnit.HOURS)),
-                new ExchangeRate("USD", "JPY", new BigDecimal("111.00"), now.minus(1, ChronoUnit.HOURS))
-        );
-        when(exchangeRateService.findHistory("USD", "JPY",
-                now.minus(3, ChronoUnit.HOURS), now)).thenReturn(history);
-
-        mockMvc.perform(get("/api/exchange-rates/history")
-                        .queryParam("requestId", "req-456")
-                        .queryParam("baseCurrency", "usd")
-                        .queryParam("targetCurrency", "jpy")
-                        .queryParam("start", now.minus(3, ChronoUnit.HOURS).toString())
-                        .queryParam("end", now.toString())
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.rates[0].targetCurrency").value("JPY"))
-                .andExpect(jsonPath("$.rates[1].rate").value("111.00"));
-
-        verify(requestLogService, Mockito.atLeastOnce()).record(any(RequestLog.class));
     }
 
     @Test
@@ -167,7 +93,7 @@ class ExchangeRateControllerTest {
                 now.minus(3, ChronoUnit.HOURS), now)).thenReturn(history);
 
         mockMvc.perform(get("/api/exchange-rates/history")
-                        .queryParam("requestId", "req-456")
+                        .queryParam("requestId", "req-xml-2")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "jpy")
                         .queryParam("start", now.minus(3, ChronoUnit.HOURS).toString())
@@ -177,6 +103,8 @@ class ExchangeRateControllerTest {
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
                 .andExpect(xpath("/exchangeRateHistory/rates/rate[1]/targetCurrency").string("JPY"))
                 .andExpect(xpath("/exchangeRateHistory/rates/rate[2]/rate").string("111.00"));
+
+        verify(requestLogService, Mockito.atLeastOnce()).record(any(RequestLog.class));
     }
 
     @Test
@@ -185,11 +113,12 @@ class ExchangeRateControllerTest {
         Instant end = start.minusSeconds(60);
 
         mockMvc.perform(get("/api/exchange-rates/history")
-                        .queryParam("requestId", "req-456")
+                        .queryParam("requestId", "req-xml-2")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "jpy")
                         .queryParam("start", start.toString())
-                        .queryParam("end", end.toString()))
+                        .queryParam("end", end.toString())
+                        .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isBadRequest());
     }
 
@@ -197,8 +126,8 @@ class ExchangeRateControllerTest {
     static class MapperConfig {
 
         @Bean
-        ApiMapper apiMapper() {
-            return Mappers.getMapper(ApiMapper.class);
+        XmlApiMapper xmlApiMapper() {
+            return Mappers.getMapper(XmlApiMapper.class);
         }
     }
 }

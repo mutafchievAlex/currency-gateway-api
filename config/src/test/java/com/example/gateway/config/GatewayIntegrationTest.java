@@ -1,9 +1,9 @@
 package com.example.gateway.config;
 
 import com.example.gateway.CurrencyGatewayApplication;
-import com.example.gateway.api.generated.model.ApiErrorRepresentation;
-import com.example.gateway.api.generated.model.ExchangeRateHistoryRepresentation;
-import com.example.gateway.api.generated.model.ExchangeRateRepresentation;
+import com.example.gateway.api.json.generated.model.ApiError;
+import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
+import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.application.StatisticsCollectorService;
 import com.example.gateway.domain.StatisticsEntry;
 import com.example.gateway.infrastructure.messaging.StatisticsPublisher;
@@ -92,14 +92,15 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
                 .queryParam("targetCurrency", "EUR")
                 .toUriString();
 
-        ResponseEntity<ExchangeRateRepresentation> response = restTemplate.getForEntity(uri, ExchangeRateRepresentation.class);
+        ResponseEntity<ExchangeRateResponse> response = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getBaseCurrency()).isEqualTo("USD");
         assertThat(response.getBody().getTargetCurrency()).isEqualTo("EUR");
-        assertThat(response.getBody().getRate()).isEqualByComparingTo("0.95");
-        assertThat(response.getBody().getTimestamp()).isEqualTo(now);
+        assertThat(response.getBody().getRate()).isEqualTo("0.95");
+        assertThat(response.getBody().getTimestamp()).isNotNull();
+        assertThat(response.getBody().getTimestamp().toInstant()).isEqualTo(now);
         assertThat(requestLogRepository.findByRequestId("json-req-1")).isPresent();
     }
 
@@ -124,22 +125,22 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(List.of(MediaType.APPLICATION_XML));
 
-        ResponseEntity<ExchangeRateHistoryRepresentation> response = restTemplate.exchange(
+        ResponseEntity<ExchangeRateHistoryResponse> response = restTemplate.exchange(
                 uri,
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                ExchangeRateHistoryRepresentation.class
+                ExchangeRateHistoryResponse.class
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(requestLogRepository.findByRequestId("xml-req-1")).isPresent();
 
-        ExchangeRateHistoryRepresentation historyResponse = response.getBody();
+        ExchangeRateHistoryResponse historyResponse = response.getBody();
         assertThat(historyResponse).isNotNull();
         assertThat(historyResponse.getRates()).hasSize(3);
-        assertThat(historyResponse.getRates().get(0).getRate()).isEqualByComparingTo("0.91");
-        assertThat(historyResponse.getRates().get(1).getRate()).isEqualByComparingTo("0.92");
-        assertThat(historyResponse.getRates().get(2).getRate()).isEqualByComparingTo("0.93");
+        assertThat(historyResponse.getRates().get(0).getRate()).isEqualTo("0.91");
+        assertThat(historyResponse.getRates().get(1).getRate()).isEqualTo("0.92");
+        assertThat(historyResponse.getRates().get(2).getRate()).isEqualTo("0.93");
     }
 
     @Test
@@ -153,10 +154,10 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
                 .queryParam("targetCurrency", "GBP")
                 .toUriString();
 
-        ResponseEntity<ExchangeRateRepresentation> firstResponse = restTemplate.getForEntity(uri, ExchangeRateRepresentation.class);
+        ResponseEntity<ExchangeRateResponse> firstResponse = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<ApiErrorRepresentation> duplicateResponse = restTemplate.getForEntity(uri, ApiErrorRepresentation.class);
+        ResponseEntity<ApiError> duplicateResponse = restTemplate.getForEntity(uri, ApiError.class);
         assertThat(duplicateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(duplicateResponse.getBody()).isNotNull();
         assertThat(duplicateResponse.getBody().getDetail()).contains("dup-req-1");
