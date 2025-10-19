@@ -13,8 +13,7 @@ The project follows Clean Architecture principles and is organized in Maven modu
 - `common` — shared utilities such as exceptions and mappers
 - `infrastructure` — implementations for persistence, messaging, and external clients
 - `scheduler` — background jobs responsible for periodic tasks
-- `api-json` — REST controllers and DTOs for JSON consumers
-- `api-xml` — XML controllers and DTOs
+- `api-controller` — unified REST controllers that negotiate JSON and XML payloads
 - `config` — Spring Boot bootstrap module and runtime configuration
 - `test-support` — reusable test fixtures and utilities
 
