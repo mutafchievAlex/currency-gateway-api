@@ -3,12 +3,12 @@ package com.example.gateway.api.xml;
 import com.example.gateway.api.xml.generated.model.ExchangeRateCommandRequest;
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateResponse;
+import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.ExchangeRate;
 import com.example.gateway.domain.RequestLog;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Locale;
 
 final class XmlApiMapper {
 
@@ -45,7 +45,7 @@ final class XmlApiMapper {
         if (currency == null) {
             return null;
         }
-        return currency.trim().toUpperCase(Locale.ROOT);
+        return ValidationUtils.normalizeCurrencyCode(currency, "currency");
     }
 
     private static String normalize(String value) {
