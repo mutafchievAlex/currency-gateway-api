@@ -1,5 +1,6 @@
 package com.example.gateway.api.json;
 
+import com.example.gateway.api.support.ExchangeRateTestFixtures;
 import com.example.gateway.application.ExchangeRateService;
 import com.example.gateway.application.RequestLogService;
 import com.example.gateway.common.exception.DuplicateRequestException;
@@ -19,10 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,8 +46,7 @@ class JsonExchangeRateControllerTest {
 
     @Test
     void returnsCurrentRateAsJson() throws Exception {
-        Instant timestamp = Instant.parse("2024-03-15T10:15:30Z");
-        ExchangeRate rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9200"), timestamp);
+        ExchangeRate rate = ExchangeRateTestFixtures.rate().build();
         when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.of(rate));
 
         mockMvc.perform(get("/api/exchange-rates/current")
@@ -62,7 +58,7 @@ class JsonExchangeRateControllerTest {
                 .andExpect(jsonPath("$.baseCurrency").value("USD"))
                 .andExpect(jsonPath("$.targetCurrency").value("EUR"))
                 .andExpect(jsonPath("$.rate").value("0.9200"))
-                .andExpect(jsonPath("$.timestamp").value("2024-03-15T10:15:30Z"));
+                .andExpect(jsonPath("$.timestamp").value(ExchangeRateTestFixtures.TIMESTAMP.toString()));
 
         ArgumentCaptor<RequestLog> captor = ArgumentCaptor.forClass(RequestLog.class);
         verify(requestLogService).record(captor.capture());
@@ -99,20 +95,15 @@ class JsonExchangeRateControllerTest {
 
     @Test
     void returnsHistoryAsJson() throws Exception {
-        Instant now = Instant.parse("2024-03-15T10:15:30Z");
-        List<ExchangeRate> history = List.of(
-                new ExchangeRate("USD", "JPY", new BigDecimal("110.00"), now.minus(2, ChronoUnit.HOURS)),
-                new ExchangeRate("USD", "JPY", new BigDecimal("111.00"), now.minus(1, ChronoUnit.HOURS))
-        );
-        when(exchangeRateService.findHistory("USD", "JPY",
-                now.minus(3, ChronoUnit.HOURS), now)).thenReturn(history);
+        ExchangeRateTestFixtures.HistoryScenario scenario = ExchangeRateTestFixtures.usdToJpyHistoryScenario();
+        when(exchangeRateService.findHistory("USD", "JPY", scenario.start(), scenario.end())).thenReturn(scenario.rates());
 
         mockMvc.perform(get("/api/exchange-rates/history")
                         .queryParam("requestId", "req-456")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "jpy")
-                        .queryParam("start", now.minus(3, ChronoUnit.HOURS).toString())
-                        .queryParam("end", now.toString())
+                        .queryParam("start", scenario.start().toString())
+                        .queryParam("end", scenario.end().toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.rates[0].targetCurrency").value("JPY"))
@@ -123,15 +114,12 @@ class JsonExchangeRateControllerTest {
 
     @Test
     void rejectsInvalidHistoryRange() throws Exception {
-        Instant start = Instant.parse("2024-03-15T10:15:30Z");
-        Instant end = start.minusSeconds(60);
-
         mockMvc.perform(get("/api/exchange-rates/history")
                         .queryParam("requestId", "req-456")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "jpy")
-                        .queryParam("start", start.toString())
-                        .queryParam("end", end.toString())
+                        .queryParam("start", ExchangeRateTestFixtures.TIMESTAMP.toString())
+                        .queryParam("end", ExchangeRateTestFixtures.TIMESTAMP.minusSeconds(60).toString())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }

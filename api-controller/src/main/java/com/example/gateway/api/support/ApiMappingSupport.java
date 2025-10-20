@@ -1,4 +1,4 @@
-package com.example.gateway.api;
+package com.example.gateway.api.support;
 
 import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.RequestLog;
@@ -32,4 +32,7 @@ public interface ApiMappingSupport {
         return timestamp.atOffset(ZoneOffset.UTC);
     }
 
+    default String safeDetail(String detail, String fallback) {
+        return detail != null ? detail : fallback;
+    }
 }
