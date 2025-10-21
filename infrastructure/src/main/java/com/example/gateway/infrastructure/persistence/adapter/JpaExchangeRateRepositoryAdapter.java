@@ -15,27 +15,29 @@ import java.util.Optional;
 public class JpaExchangeRateRepositoryAdapter implements ExchangeRateRepositoryPort {
 
     private final ExchangeRateRepository repository;
+    private final PersistenceMappers mapper;
 
-    public JpaExchangeRateRepositoryAdapter(ExchangeRateRepository repository) {
+    public JpaExchangeRateRepositoryAdapter(ExchangeRateRepository repository, PersistenceMappers mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public Optional<ExchangeRate> findByPairAndTimestamp(String baseCurrency, String targetCurrency, Instant timestamp) {
         return repository.findByBaseCurrencyAndTargetCurrencyAndRecordedAt(baseCurrency, targetCurrency, timestamp)
-                .map(PersistenceMappers::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
     public ExchangeRate save(ExchangeRate rate) {
-        ExchangeRateEntity saved = repository.save(PersistenceMappers.toEntity(rate));
-        return PersistenceMappers.toDomain(saved);
+        ExchangeRateEntity saved = repository.save(mapper.toEntity(rate));
+        return mapper.toDomain(saved);
     }
 
     @Override
     public Optional<ExchangeRate> findLatestByPair(String baseCurrency, String targetCurrency) {
         return repository.findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc(baseCurrency, targetCurrency)
-                .map(PersistenceMappers::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class JpaExchangeRateRepositoryAdapter implements ExchangeRateRepositoryP
         return repository
                 .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(baseCurrency, targetCurrency, start, end)
                 .stream()
-                .map(PersistenceMappers::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 }

@@ -7,6 +7,7 @@ import com.example.gateway.infrastructure.persistence.repository.StatisticsRepos
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,16 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 class StatisticsRepositoryTest {
 
+    private static final PersistenceMappers MAPPER = Mappers.getMapper(PersistenceMappers.class);
+
     @Autowired
     private StatisticsRepository repository;
 
     @Test
     void findsEntriesWithinInterval() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        repository.save(PersistenceMappers.toEntity(new StatisticsEntry("requests", new BigDecimal("1.0"), now.minusSeconds(120))));
-        repository.save(PersistenceMappers.toEntity(new StatisticsEntry("requests", new BigDecimal("2.0"), now.minusSeconds(60))));
-        repository.save(PersistenceMappers.toEntity(new StatisticsEntry("requests", new BigDecimal("3.0"), now)));
-        repository.save(PersistenceMappers.toEntity(new StatisticsEntry("errors", new BigDecimal("1.0"), now)));
+        repository.save(MAPPER.toEntity(new StatisticsEntry("requests", new BigDecimal("1.0"), now.minusSeconds(120))));
+        repository.save(MAPPER.toEntity(new StatisticsEntry("requests", new BigDecimal("2.0"), now.minusSeconds(60))));
+        repository.save(MAPPER.toEntity(new StatisticsEntry("requests", new BigDecimal("3.0"), now)));
+        repository.save(MAPPER.toEntity(new StatisticsEntry("errors", new BigDecimal("1.0"), now)));
 
         List<StatisticsEntryEntity> entries = repository
                 .findByMetricNameAndRecordedAtBetweenOrderByRecordedAtAsc("requests", now.minusSeconds(90), now.plusSeconds(1));
