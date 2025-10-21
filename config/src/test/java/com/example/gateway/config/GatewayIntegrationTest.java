@@ -1,7 +1,7 @@
 package com.example.gateway.config;
 
 import com.example.gateway.CurrencyGatewayApplication;
-import com.example.gateway.api.error.ApiErrorResponse;
+import com.example.gateway.api.json.generated.model.ApiErrorResponse;
 import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.application.StatisticsCollectorService;

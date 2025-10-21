@@ -1,10 +1,11 @@
-package com.example.gateway.api.error.mapper;
+package com.example.gateway.api.exception.mapper;
 
-import com.example.gateway.api.error.ApiErrorResponse;
-import jakarta.ws.rs.core.Response;
+import com.example.gateway.api.exception.ApiErrorResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -22,19 +23,15 @@ public class MethodArgumentNotValidExceptionMapper implements ApiExceptionMapper
     }
 
     @Override
-    public Response toResponse(Throwable exception) {
+    public ResponseEntity<ApiErrorResponse> toResponse(Throwable exception) {
         MethodArgumentNotValidException notValidException = (MethodArgumentNotValidException) exception;
         LOGGER.info("Request body validation failed: {}", notValidException.getMessage());
-
+        String message = buildMessage(notValidException);
         ApiErrorResponse payload = new ApiErrorResponse();
-        payload.setCode(Response.Status.BAD_REQUEST.getStatusCode());
+        payload.setCode(HttpStatus.BAD_REQUEST.value());
         payload.setType("Validation failed");
-        payload.setMessage(buildMessage(notValidException));
-
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity(payload)
-                .type(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
-                .build();
+        payload.setMessage(message);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(payload);
     }
 
     private String buildMessage(MethodArgumentNotValidException exception) {

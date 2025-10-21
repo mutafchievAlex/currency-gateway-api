@@ -1,13 +1,14 @@
-package com.example.gateway.api.error.mapper;
+package com.example.gateway.api.exception.mapper;
 
-import jakarta.ws.rs.core.Response;
+import com.example.gateway.api.exception.ApiErrorResponse;
 import org.springframework.core.Ordered;
+import org.springframework.http.ResponseEntity;
 
 public interface ApiExceptionMapper<T extends Throwable> extends Ordered {
 
     boolean supports(Throwable exception);
 
-    Response toResponse(Throwable exception);
+    ResponseEntity<ApiErrorResponse> toResponse(Throwable exception);
 
     @Override
     default int getOrder() {
