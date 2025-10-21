@@ -12,6 +12,16 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@Data
 @Entity
 @Table(name = "request_logs",
         indexes = {
@@ -39,50 +49,4 @@ public class RequestLogEntity {
     @Column(name = "timestamp", nullable = false)
     private Instant timestamp;
 
-    protected RequestLogEntity() {
-        // JPA
-    }
-
-    public RequestLogEntity(String requestId, String endpoint, String httpMethod, Instant timestamp) {
-        this.requestId = requestId;
-        this.endpoint = endpoint;
-        this.httpMethod = httpMethod;
-        this.timestamp = timestamp;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getRequestId() {
-        return requestId;
-    }
-
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
-    }
-
-    public String getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-        this.endpoint = endpoint;
-    }
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
-    public Instant getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Instant timestamp) {
-        this.timestamp = timestamp;
-    }
 }

@@ -14,6 +14,16 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@Data
 @Entity
 @Table(name = "exchange_rates",
         indexes = {
@@ -46,50 +56,4 @@ public class ExchangeRateEntity {
     @Column(name = "recorded_at", nullable = false)
     private Instant recordedAt;
 
-    protected ExchangeRateEntity() {
-        // JPA
-    }
-
-    public ExchangeRateEntity(String baseCurrency, String targetCurrency, BigDecimal rate, Instant recordedAt) {
-        this.baseCurrency = baseCurrency;
-        this.targetCurrency = targetCurrency;
-        this.rate = rate;
-        this.recordedAt = recordedAt;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getBaseCurrency() {
-        return baseCurrency;
-    }
-
-    public void setBaseCurrency(String baseCurrency) {
-        this.baseCurrency = baseCurrency;
-    }
-
-    public String getTargetCurrency() {
-        return targetCurrency;
-    }
-
-    public void setTargetCurrency(String targetCurrency) {
-        this.targetCurrency = targetCurrency;
-    }
-
-    public BigDecimal getRate() {
-        return rate;
-    }
-
-    public void setRate(BigDecimal rate) {
-        this.rate = rate;
-    }
-
-    public Instant getRecordedAt() {
-        return recordedAt;
-    }
-
-    public void setRecordedAt(Instant recordedAt) {
-        this.recordedAt = recordedAt;
-    }
 }
