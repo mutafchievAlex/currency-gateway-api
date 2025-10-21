@@ -1,7 +1,7 @@
 package com.example.gateway.domain.repository;
 
-import com.example.gateway.common.exception.MissingRequiredValueException;
-import com.example.gateway.common.validation.ValidationUtils;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
+import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 

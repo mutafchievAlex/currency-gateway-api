@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 public class DuplicateRequestException extends GatewayClientException {
 

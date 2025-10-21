@@ -1,7 +1,5 @@
 package com.example.gateway.domain.exception;
 
-import com.example.gateway.common.exception.ResourceNotFoundException;
-
 /**
  * Thrown when an exchange rate cannot be located for the requested currency pair.
  */

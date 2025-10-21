@@ -17,6 +17,11 @@
     <dependencies>
         <dependency>
             <groupId>com.example.gateway</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.example.gateway</groupId>
             <artifactId>data-access</artifactId>
             <version>${project.version}</version>
         </dependency>

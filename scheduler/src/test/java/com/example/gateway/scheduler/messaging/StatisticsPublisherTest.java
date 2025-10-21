@@ -1,6 +1,6 @@
 package com.example.gateway.scheduler.messaging;
 
-import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
 import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.domain.validation.BeanValidationService;
 import org.junit.jupiter.api.BeforeEach;

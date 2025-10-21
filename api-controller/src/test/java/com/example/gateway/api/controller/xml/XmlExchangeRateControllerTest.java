@@ -2,8 +2,8 @@ package com.example.gateway.api.controller.xml;
 
 import com.example.gateway.api.mapper.xml.XmlApiMapper;
 import com.example.gateway.api.support.ExchangeRateTestFixtures;
-import com.example.gateway.common.exception.DuplicateRequestException;
-import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.domain.exception.DuplicateRequestException;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
 import com.example.gateway.domain.exception.ExchangeRateNotFoundException;
 import com.example.gateway.domain.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.domain.model.ExchangeRate;

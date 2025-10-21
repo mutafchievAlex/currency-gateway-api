@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 /**
  * Base type for all custom gateway runtime exceptions that carry HTTP semantics.
