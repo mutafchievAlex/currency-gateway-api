@@ -1,9 +1,9 @@
 package com.example.gateway.scheduler.messaging;
 
-import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.common.exception.MissingRequiredValueException;
 import com.example.gateway.common.validation.ValidationUtils;
-import com.example.gateway.domain.StatisticsEntry;
+import com.example.gateway.domain.model.StatisticsEntry;
+import com.example.gateway.domain.validation.BeanValidationService;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;

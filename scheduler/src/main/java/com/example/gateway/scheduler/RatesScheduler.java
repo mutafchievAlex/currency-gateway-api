@@ -1,7 +1,7 @@
 package com.example.gateway.scheduler;
 
-import com.example.gateway.application.RatesCollectorService;
-import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.domain.service.RatesCollectorService;
+import com.example.gateway.domain.validation.BeanValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

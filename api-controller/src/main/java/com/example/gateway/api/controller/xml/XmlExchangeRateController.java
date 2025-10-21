@@ -4,8 +4,8 @@ import com.example.gateway.api.mapper.xml.XmlApiMapper;
 import com.example.gateway.api.xml.generated.api.XmlExchangeRatesApi;
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateResponse;
-import com.example.gateway.application.ExchangeRateQueryApplicationService;
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.model.ExchangeRate;
+import com.example.gateway.domain.service.ExchangeRateQueryService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -23,10 +23,10 @@ public class XmlExchangeRateController implements XmlExchangeRatesApi {
     private static final String CURRENT_ENDPOINT = "/api/exchange-rates/current";
     private static final String HISTORY_ENDPOINT = "/api/exchange-rates/history";
 
-    private final ExchangeRateQueryApplicationService exchangeRateQueryService;
+    private final ExchangeRateQueryService exchangeRateQueryService;
     private final XmlApiMapper mapper;
 
-    public XmlExchangeRateController(ExchangeRateQueryApplicationService exchangeRateQueryService,
+    public XmlExchangeRateController(ExchangeRateQueryService exchangeRateQueryService,
                                      XmlApiMapper mapper) {
         this.exchangeRateQueryService = exchangeRateQueryService;
         this.mapper = mapper;

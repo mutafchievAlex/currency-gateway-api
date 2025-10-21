@@ -1,6 +1,6 @@
 package com.example.gateway.dataaccess.persistence;
 
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.model.ExchangeRate;
 import com.example.gateway.dataaccess.entity.ExchangeRateEntity;
 import com.example.gateway.dataaccess.mapper.PersistenceMappers;
 import com.example.gateway.dataaccess.repository.ExchangeRateRepository;

@@ -3,7 +3,7 @@ package com.example.gateway.api.mapper.json;
 import com.example.gateway.api.json.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
 import com.example.gateway.api.mapper.ExchangeRatesApiMapper;
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.model.ExchangeRate;
 import org.mapstruct.Mapper;
 
 import java.util.List;

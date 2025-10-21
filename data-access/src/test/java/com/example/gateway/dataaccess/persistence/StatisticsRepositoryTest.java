@@ -1,6 +1,6 @@
 package com.example.gateway.dataaccess.persistence;
 
-import com.example.gateway.domain.StatisticsEntry;
+import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.dataaccess.entity.StatisticsEntryEntity;
 import com.example.gateway.dataaccess.mapper.PersistenceMappers;
 import com.example.gateway.dataaccess.repository.StatisticsRepository;
