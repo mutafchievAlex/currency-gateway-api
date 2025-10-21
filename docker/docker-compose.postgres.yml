@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: ..
+      dockerfile: docker/postgres/Dockerfile
+    container_name: currency-gateway-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME:-currency_gateway}
+      POSTGRES_USER: ${DB_USERNAME:-currency}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-currency}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-currency}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local

@@ -54,6 +54,26 @@ override credentials and the virtual host with the `RABBITMQ_USERNAME`,
 `RABBITMQ_PASSWORD`, and `RABBITMQ_VHOST` environment variables when starting
 the compose stack.
 
+#### Start PostgreSQL locally
+
+A Docker setup is provided to spin up a PostgreSQL instance for local
+development. Flyway manages the schema when the Spring Boot application starts,
+so the container itself does not pre-create any tables.
+
+```bash
+docker compose -f docker/docker-compose.postgres.yml up --build
+```
+
+The database is exposed on `localhost:5432` with the default credentials
+`currency` / `currency` and the database name `currency_gateway`. You can change
+them via the `DB_USERNAME`, `DB_PASSWORD`, and `DB_NAME` environment variables
+when launching the compose stack.
+
+The migrations live under `infrastructure/src/main/resources/db/migration`.
+`V1__create_core_tables.sql` provisions the application tables and is applied by
+Flyway on application startup so that local databases stay in sync with the
+schema expected by the service.
+
 The Spring Boot application entry point is located in the `config` module:
 
 ```bash
@@ -72,6 +92,24 @@ when running locally or in production:
 - `RABBITMQ_EXCHANGE`
 
 These values are resolved via standard Spring Boot configuration properties.
+
+### Database schema
+
+The schema is managed via Flyway migrations stored in
+`infrastructure/src/main/resources/db/migration`. The initial migration creates
+the following tables:
+
+- `exchange_rates` — stores individual exchange rate observations together with
+  their timestamp and currency pair. It enforces uniqueness across
+  `(base_currency, target_currency, recorded_at)` and provides indexes for
+  querying by timestamp and currency pair.
+- `request_logs` — captures API requests with their identifier, endpoint, HTTP
+  method, and timestamp. The `request_id` column is unique to prevent duplicate
+  processing and indexes make lookup by timestamp or endpoint efficient.
+- `statistics_entries` — contains metric samples collected by the gateway. Each
+  row stores a metric name, its numeric value, and the moment it was recorded,
+  with uniqueness on `(metric_name, recorded_at)` and supporting indexes for
+  retrieval by metric or timestamp.
 
 ## Next steps
 
