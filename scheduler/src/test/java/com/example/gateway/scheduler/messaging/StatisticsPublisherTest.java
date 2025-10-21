@@ -1,8 +1,8 @@
 package com.example.gateway.scheduler.messaging;
 
-import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.common.exception.MissingRequiredValueException;
-import com.example.gateway.domain.StatisticsEntry;
+import com.example.gateway.domain.model.StatisticsEntry;
+import com.example.gateway.domain.validation.BeanValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,6 +1,6 @@
 package com.example.gateway.config;
 
-import com.example.gateway.domain.StatisticsEntry;
+import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.scheduler.messaging.StatisticsPublisher;
 import com.example.gateway.testsupport.IntegrationTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;

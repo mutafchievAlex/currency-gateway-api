@@ -2,12 +2,12 @@ package com.example.gateway.api.controller.json;
 
 import com.example.gateway.api.mapper.json.JsonApiMapper;
 import com.example.gateway.api.support.ExchangeRateTestFixtures;
-import com.example.gateway.application.ExchangeRateQueryApplicationService;
-import com.example.gateway.application.exception.ExchangeRateNotFoundException;
-import com.example.gateway.application.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.common.exception.DuplicateRequestException;
 import com.example.gateway.common.exception.MissingRequiredValueException;
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.exception.ExchangeRateNotFoundException;
+import com.example.gateway.domain.exception.InvalidExchangeRateQueryException;
+import com.example.gateway.domain.model.ExchangeRate;
+import com.example.gateway.domain.service.ExchangeRateQueryService;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import org.mockito.ArgumentCaptor;
@@ -38,7 +38,7 @@ class JsonExchangeRateControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private ExchangeRateQueryApplicationService exchangeRateQueryService;
+    private ExchangeRateQueryService exchangeRateQueryService;
 
     @Test
     void returnsCurrentRateAsJson() throws Exception {

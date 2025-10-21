@@ -1,7 +1,7 @@
 package com.example.gateway.scheduler;
 
-import com.example.gateway.application.RatesCollectorService;
-import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.domain.service.RatesCollectorService;
+import com.example.gateway.domain.validation.BeanValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;

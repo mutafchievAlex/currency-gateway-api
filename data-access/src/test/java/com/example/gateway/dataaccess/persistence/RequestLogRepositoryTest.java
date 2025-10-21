@@ -1,6 +1,6 @@
 package com.example.gateway.dataaccess.persistence;
 
-import com.example.gateway.domain.RequestLog;
+import com.example.gateway.domain.model.RequestLog;
 import com.example.gateway.dataaccess.entity.RequestLogEntity;
 import com.example.gateway.dataaccess.mapper.PersistenceMappers;
 import com.example.gateway.dataaccess.repository.RequestLogRepository;

@@ -1,6 +1,6 @@
 package com.example.gateway.api.support;
 
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.model.ExchangeRate;
 
 import java.math.BigDecimal;
 import java.time.Instant;

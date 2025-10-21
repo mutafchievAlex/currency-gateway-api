@@ -1,8 +1,8 @@
 package com.example.gateway.scheduler.client;
 
-import com.example.gateway.application.port.ExternalRatesClient;
-import com.example.gateway.application.port.RatesSnapshot;
-import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.domain.repository.ExternalRatesClient;
+import com.example.gateway.domain.repository.RatesSnapshot;
+import com.example.gateway.domain.validation.BeanValidationService;
 import com.example.gateway.common.validation.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

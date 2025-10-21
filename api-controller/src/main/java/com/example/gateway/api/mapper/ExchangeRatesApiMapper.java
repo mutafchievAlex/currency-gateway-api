@@ -1,6 +1,6 @@
 package com.example.gateway.api.mapper;
 
-import com.example.gateway.domain.ExchangeRate;
+import com.example.gateway.domain.model.ExchangeRate;
 
 import java.util.List;
 

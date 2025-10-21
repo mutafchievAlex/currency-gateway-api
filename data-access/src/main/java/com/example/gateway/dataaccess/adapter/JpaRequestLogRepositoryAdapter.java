@@ -1,7 +1,7 @@
 package com.example.gateway.dataaccess.adapter;
 
-import com.example.gateway.application.port.RequestLogRepositoryPort;
-import com.example.gateway.domain.RequestLog;
+import com.example.gateway.domain.model.RequestLog;
+import com.example.gateway.domain.repository.RequestLogRepositoryPort;
 import com.example.gateway.dataaccess.entity.RequestLogEntity;
 import com.example.gateway.dataaccess.mapper.PersistenceMappers;
 import com.example.gateway.dataaccess.repository.RequestLogRepository;
