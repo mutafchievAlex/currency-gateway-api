@@ -21,7 +21,7 @@
         <module>common</module>
         <module>domain</module>
         <module>application</module>
-        <module>infrastructure</module>
+        <module>data-access</module>
         <module>scheduler</module>
         <module>api-controller</module>
         <module>config</module>
