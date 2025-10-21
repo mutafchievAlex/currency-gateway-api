@@ -13,6 +13,16 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
+@Data
 @Entity
 @Table(name = "statistics_entries",
         indexes = {
@@ -37,41 +47,4 @@ public class StatisticsEntryEntity {
     @Column(name = "recorded_at", nullable = false)
     private Instant recordedAt;
 
-    protected StatisticsEntryEntity() {
-        // JPA
-    }
-
-    public StatisticsEntryEntity(String metric, BigDecimal value, Instant recordedAt) {
-        this.metric = metric;
-        this.value = value;
-        this.recordedAt = recordedAt;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getMetric() {
-        return metric;
-    }
-
-    public void setMetric(String metric) {
-        this.metric = metric;
-    }
-
-    public BigDecimal getValue() {
-        return value;
-    }
-
-    public void setValue(BigDecimal value) {
-        this.value = value;
-    }
-
-    public Instant getRecordedAt() {
-        return recordedAt;
-    }
-
-    public void setRecordedAt(Instant recordedAt) {
-        this.recordedAt = recordedAt;
-    }
 }
