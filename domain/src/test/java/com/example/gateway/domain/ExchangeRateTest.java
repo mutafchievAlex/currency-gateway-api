@@ -1,14 +1,16 @@
 package com.example.gateway.domain;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.common.exception.RequestValidationException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ExchangeRateTest {
 
@@ -29,10 +31,10 @@ class ExchangeRateTest {
     void constructorRejectsInvalidCurrencies() {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RequestValidationException.class,
                 () -> new ExchangeRate("US1", "EUR", BigDecimal.ONE, timestamp));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RequestValidationException.class,
                 () -> new ExchangeRate("USD", "EU", BigDecimal.ONE, timestamp));
     }
 
@@ -41,22 +43,22 @@ class ExchangeRateTest {
     void constructorRejectsInvalidValues() {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
 
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new ExchangeRate(null, "EUR", BigDecimal.ONE, timestamp));
 
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new ExchangeRate("USD", null, BigDecimal.ONE, timestamp));
 
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new ExchangeRate("USD", "EUR", null, timestamp));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RequestValidationException.class,
                 () -> new ExchangeRate("USD", "EUR", BigDecimal.ZERO, timestamp));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(RequestValidationException.class,
                 () -> new ExchangeRate("USD", "EUR", BigDecimal.ONE.negate(), timestamp));
 
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new ExchangeRate("USD", "EUR", BigDecimal.ONE, null));
     }
 }

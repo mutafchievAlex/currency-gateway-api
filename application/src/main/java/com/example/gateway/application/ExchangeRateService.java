@@ -1,14 +1,15 @@
 package com.example.gateway.application;
 
+import com.example.gateway.application.exception.ExchangeRateNotFoundException;
+import com.example.gateway.application.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.application.port.ExchangeRateRepositoryPort;
+import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.ExchangeRate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Application service that encapsulates persistence rules for {@link ExchangeRate} instances.
@@ -17,25 +18,28 @@ import java.util.Optional;
 public class ExchangeRateService {
 
     private final ExchangeRateRepositoryPort repository;
+    private final BeanValidationService validationService;
 
-    public ExchangeRateService(ExchangeRateRepositoryPort repository) {
-        this.repository = Objects.requireNonNull(repository, "repository must not be null");
+    public ExchangeRateService(ExchangeRateRepositoryPort repository, BeanValidationService validationService) {
+        this.repository = repository;
+        this.validationService = validationService;
     }
 
     public boolean saveIfAbsent(ExchangeRate rate) {
-        Objects.requireNonNull(rate, "rate must not be null");
-        return repository.findByPairAndTimestamp(rate.baseCurrency(), rate.targetCurrency(), rate.timestamp())
+        ExchangeRate candidate = validationService.requireValid(rate, "rate");
+        return repository.findByPairAndTimestamp(candidate.baseCurrency(), candidate.targetCurrency(), candidate.timestamp())
                 .map(existing -> false)
                 .orElseGet(() -> {
-                    repository.save(rate);
+                    repository.save(candidate);
                     return true;
                 });
     }
 
-    public Optional<ExchangeRate> findLatest(String baseCurrency, String targetCurrency) {
+    public ExchangeRate getLatest(String baseCurrency, String targetCurrency) {
         String normalizedBase = ValidationUtils.normalizeCurrencyCode(baseCurrency, "baseCurrency");
         String normalizedTarget = ValidationUtils.normalizeCurrencyCode(targetCurrency, "targetCurrency");
-        return repository.findLatestByPair(normalizedBase, normalizedTarget);
+        return repository.findLatestByPair(normalizedBase, normalizedTarget)
+                .orElseThrow(() -> new ExchangeRateNotFoundException(normalizedBase, normalizedTarget));
     }
 
     public List<ExchangeRate> findHistory(String baseCurrency,
@@ -44,11 +48,11 @@ public class ExchangeRateService {
                                           Instant end) {
         String normalizedBase = ValidationUtils.normalizeCurrencyCode(baseCurrency, "baseCurrency");
         String normalizedTarget = ValidationUtils.normalizeCurrencyCode(targetCurrency, "targetCurrency");
-        Objects.requireNonNull(start, "start must not be null");
-        Objects.requireNonNull(end, "end must not be null");
-        if (start.isAfter(end)) {
-            throw new IllegalArgumentException("start must not be after end");
+        Instant safeStart = validationService.requirePresent(start, "start");
+        Instant safeEnd = validationService.requirePresent(end, "end");
+        if (safeStart.isAfter(safeEnd)) {
+            throw new InvalidExchangeRateQueryException("start must be before or equal to end");
         }
-        return repository.findWithinRange(normalizedBase, normalizedTarget, start, end);
+        return repository.findWithinRange(normalizedBase, normalizedTarget, safeStart, safeEnd);
     }
 }

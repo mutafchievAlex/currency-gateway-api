@@ -27,6 +27,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/exchange-rates/history:
     get:
       tags:
@@ -52,6 +54,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   parameters:
     RequestId:
@@ -60,6 +64,7 @@ components:
       required: true
       schema:
         type: string
+        minLength: 1
       description: Unique identifier for the request
     BaseCurrency:
       name: baseCurrency
@@ -101,19 +106,25 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
     NotFound:
       description: Requested exchange rate not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
     Conflict:
       description: Duplicate request identifier detected
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
+    InternalServerError:
+      description: Unexpected server-side failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
   schemas:
     ExchangeRateResponse:
       type: object
@@ -142,17 +153,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExchangeRateResponse'
-    ApiError:
+    ApiErrorResponse:
       type: object
       required:
-        - title
-        - status
-        - detail
+        - code
+        - type
+        - message
       properties:
-        title:
-          type: string
-        status:
+        code:
           type: integer
           format: int32
-        detail:
+        type:
+          type: string
+        message:
           type: string

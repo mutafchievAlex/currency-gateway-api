@@ -2,6 +2,8 @@ package com.example.gateway.infrastructure.external;
 
 import com.example.gateway.application.port.ExternalRatesClient;
 import com.example.gateway.application.port.RatesSnapshot;
+import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.common.validation.ValidationUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,20 +27,24 @@ public class FixerClient implements ExternalRatesClient {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final BeanValidationService validationService;
 
     public FixerClient(RestClient.Builder builder,
                        @Value("${fixer.url:https://data.fixer.io/api}") String baseUrl,
-                       @Value("${fixer.api-key}") String apiKey) {
-        this.restClient = builder.baseUrl(Objects.requireNonNull(baseUrl, "baseUrl must not be null")).build();
-        this.apiKey = Objects.requireNonNull(apiKey, "apiKey must not be null");
+                       @Value("${fixer.api-key}") String apiKey,
+                       BeanValidationService validationService) {
+        this.validationService = validationService;
+        String normalizedBaseUrl = ValidationUtils.requireTrimmedNotBlank(baseUrl, "baseUrl");
+        this.restClient = builder.baseUrl(normalizedBaseUrl).build();
+        this.apiKey = ValidationUtils.requireTrimmedNotBlank(apiKey, "apiKey");
     }
 
     @Override
     public RatesSnapshot fetchLatestRates(String baseCurrency, Collection<String> targetCurrencies) {
-        Objects.requireNonNull(baseCurrency, "baseCurrency must not be null");
-        Objects.requireNonNull(targetCurrencies, "targetCurrencies must not be null");
+        String normalizedBase = ValidationUtils.requireTrimmedNotBlank(baseCurrency, "baseCurrency").toUpperCase(Locale.ROOT);
+        Collection<String> safeTargets = validationService.requirePresent(targetCurrencies, "targetCurrencies");
 
-        Collection<String> normalizedTargets = targetCurrencies.stream()
+        Collection<String> normalizedTargets = safeTargets.stream()
                 .filter(Objects::nonNull)
                 .map(currency -> currency.trim().toUpperCase(Locale.ROOT))
                 .filter(value -> !value.isEmpty())
@@ -48,7 +54,7 @@ public class FixerClient implements ExternalRatesClient {
                 .uri(uriBuilder -> {
                     uriBuilder.path("/latest")
                             .queryParam("access_key", apiKey)
-                            .queryParam("base", baseCurrency);
+                            .queryParam("base", normalizedBase);
                     if (!normalizedTargets.isEmpty()) {
                         uriBuilder.queryParam("symbols", String.join(",", normalizedTargets));
                     }

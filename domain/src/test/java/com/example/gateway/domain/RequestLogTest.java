@@ -1,13 +1,14 @@
 package com.example.gateway.domain;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import com.example.gateway.common.exception.MissingRequiredValueException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class RequestLogTest {
 
@@ -28,13 +29,13 @@ class RequestLogTest {
     void constructorRejectsNulls() {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
 
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new RequestLog(null, "/rates", "GET", timestamp));
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new RequestLog("id-1", null, "GET", timestamp));
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new RequestLog("id-1", "/rates", null, timestamp));
-        assertThrows(NullPointerException.class,
+        assertThrows(MissingRequiredValueException.class,
                 () -> new RequestLog("id-1", "/rates", "GET", null));
     }
 }

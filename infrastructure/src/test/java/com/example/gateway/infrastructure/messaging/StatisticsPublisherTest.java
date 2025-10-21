@@ -1,5 +1,7 @@
 package com.example.gateway.infrastructure.messaging;
 
+import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.common.exception.MissingRequiredValueException;
 import com.example.gateway.domain.StatisticsEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +17,11 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class StatisticsPublisherTest {
@@ -24,13 +29,19 @@ class StatisticsPublisherTest {
     @Mock
     private RabbitTemplate rabbitTemplate;
 
+    @Mock
+    private BeanValidationService validationService;
+
     private TopicExchange exchange;
     private StatisticsPublisher publisher;
 
     @BeforeEach
     void setUp() {
         exchange = new TopicExchange("currency.statistics");
-        publisher = new StatisticsPublisher(rabbitTemplate, exchange);
+        when(validationService.requirePresent(eq(rabbitTemplate), anyString())).thenReturn(rabbitTemplate);
+        when(validationService.requirePresent(eq(exchange), anyString())).thenReturn(exchange);
+        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        publisher = new StatisticsPublisher(rabbitTemplate, exchange, validationService);
     }
 
     @Test
@@ -58,6 +69,6 @@ class StatisticsPublisherTest {
 
     @Test
     void rejectsNullStatisticsEntry() {
-        assertThrows(NullPointerException.class, () -> publisher.publish(null));
+        assertThrows(MissingRequiredValueException.class, () -> publisher.publish(null));
     }
 }

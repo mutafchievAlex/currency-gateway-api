@@ -1,9 +1,15 @@
 package com.example.gateway.api.json;
 
+import com.example.gateway.api.config.JaxRsResponseConfigurer;
+import com.example.gateway.api.config.JaxRsResponseReturnValueHandler;
+import com.example.gateway.api.json.mapper.JsonApiMapper;
 import com.example.gateway.api.support.ExchangeRateTestFixtures;
+import com.example.gateway.application.exception.ExchangeRateNotFoundException;
 import com.example.gateway.application.ExchangeRateService;
 import com.example.gateway.application.RequestLogService;
+import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.common.exception.DuplicateRequestException;
+import com.example.gateway.common.exception.MissingRequiredValueException;
 import com.example.gateway.domain.ExchangeRate;
 import com.example.gateway.domain.RequestLog;
 import org.junit.jupiter.api.Test;
@@ -20,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Optional;
+import jakarta.validation.Validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,7 +38,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(JsonExchangeRateController.class)
-@Import(JsonExchangeRateControllerTest.MapperConfig.class)
+@Import({JsonExchangeRateControllerTest.MapperConfig.class,
+        JaxRsResponseReturnValueHandler.class,
+        JaxRsResponseConfigurer.class})
 class JsonExchangeRateControllerTest {
 
     @Autowired
@@ -47,7 +55,7 @@ class JsonExchangeRateControllerTest {
     @Test
     void returnsCurrentRateAsJson() throws Exception {
         ExchangeRate rate = ExchangeRateTestFixtures.rate().build();
-        when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.of(rate));
+        when(exchangeRateService.getLatest("USD", "EUR")).thenReturn(rate);
 
         mockMvc.perform(get("/api/exchange-rates/current")
                         .queryParam("requestId", "req-123")
@@ -68,14 +76,17 @@ class JsonExchangeRateControllerTest {
 
     @Test
     void returnsNotFoundWhenCurrentRateMissing() throws Exception {
-        when(exchangeRateService.findLatest("USD", "EUR")).thenReturn(Optional.empty());
+        when(exchangeRateService.getLatest("USD", "EUR"))
+                .thenThrow(new ExchangeRateNotFoundException("USD", "EUR"));
 
         mockMvc.perform(get("/api/exchange-rates/current")
                         .queryParam("requestId", "req-123")
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
+                .andExpect(jsonPath("$.type").value(HttpStatus.NOT_FOUND.getReasonPhrase()));
     }
 
     @Test
@@ -89,8 +100,23 @@ class JsonExchangeRateControllerTest {
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.title").value("Duplicate request"))
-                .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()));
+                .andExpect(jsonPath("$.type").value("Duplicate request"))
+                .andExpect(jsonPath("$.code").value(HttpStatus.CONFLICT.value()));
+    }
+
+    @Test
+    void returnsBadRequestWhenMandatoryValueMissing() throws Exception {
+        when(exchangeRateService.getLatest("USD", "EUR"))
+                .thenThrow(new MissingRequiredValueException("baseCurrency must not be null"));
+
+        mockMvc.perform(get("/api/exchange-rates/current")
+                        .queryParam("requestId", "req-123")
+                        .queryParam("baseCurrency", "usd")
+                        .queryParam("targetCurrency", "eur")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.type").value("Missing required value"))
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @Test
@@ -121,7 +147,8 @@ class JsonExchangeRateControllerTest {
                         .queryParam("start", ExchangeRateTestFixtures.TIMESTAMP.toString())
                         .queryParam("end", ExchangeRateTestFixtures.TIMESTAMP.minusSeconds(60).toString())
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(HttpStatus.BAD_REQUEST.value()));
     }
 
     @TestConfiguration
@@ -130,6 +157,11 @@ class JsonExchangeRateControllerTest {
         @Bean
         JsonApiMapper jsonApiMapper() {
             return Mappers.getMapper(JsonApiMapper.class);
+        }
+
+        @Bean
+        BeanValidationService beanValidationService(Validator validator) {
+            return new BeanValidationService(validator);
         }
     }
 }

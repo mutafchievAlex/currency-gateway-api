@@ -1,6 +1,7 @@
 package com.example.gateway.scheduler;
 
 import com.example.gateway.application.RatesCollectorService;
+import com.example.gateway.application.validation.BeanValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +19,8 @@ import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -26,6 +29,7 @@ class RatesSchedulerTest {
     private RatesCollectorService ratesCollectorService;
     private CollectorJobProperties collectorJobProperties;
     private RatesScheduler scheduler;
+    private BeanValidationService validationService;
 
     @BeforeEach
     void setUp() {
@@ -33,7 +37,9 @@ class RatesSchedulerTest {
         collectorJobProperties = new CollectorJobProperties();
         collectorJobProperties.setBaseCurrency("USD");
         collectorJobProperties.setTargetCurrencies(List.of("EUR", "GBP"));
-        scheduler = new RatesScheduler(ratesCollectorService, collectorJobProperties);
+        validationService = mock(BeanValidationService.class);
+        doAnswer(invocation -> invocation.getArgument(0)).when(validationService).requirePresent(any(), anyString());
+        scheduler = new RatesScheduler(ratesCollectorService, collectorJobProperties, validationService);
     }
 
     @Test

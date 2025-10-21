@@ -1,5 +1,8 @@
 package com.example.gateway.infrastructure.messaging;
 
+import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.StatisticsEntry;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -7,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 
 /**
  * Publishes statistics events to RabbitMQ.
@@ -17,17 +19,21 @@ public class StatisticsPublisher {
 
     private final RabbitTemplate rabbitTemplate;
     private final TopicExchange statisticsExchange;
+    private final BeanValidationService validationService;
 
-    public StatisticsPublisher(RabbitTemplate rabbitTemplate, TopicExchange statisticsExchange) {
-        this.rabbitTemplate = Objects.requireNonNull(rabbitTemplate, "rabbitTemplate must not be null");
-        this.statisticsExchange = Objects.requireNonNull(statisticsExchange, "statisticsExchange must not be null");
+    public StatisticsPublisher(RabbitTemplate rabbitTemplate,
+                               TopicExchange statisticsExchange,
+                               BeanValidationService validationService) {
+        this.validationService = validationService;
+        this.rabbitTemplate = validationService.requirePresent(rabbitTemplate, "rabbitTemplate");
+        this.statisticsExchange = validationService.requirePresent(statisticsExchange, "statisticsExchange");
     }
 
     public void publish(StatisticsEntry entry) {
-        Objects.requireNonNull(entry, "entry must not be null");
+        StatisticsEntry candidate = validationService.requireValid(entry, "entry");
 
-        String routingKey = buildRoutingKey(entry.metricName());
-        rabbitTemplate.convertAndSend(statisticsExchange.getName(), routingKey, StatisticsEvent.from(entry));
+        String routingKey = buildRoutingKey(candidate.metricName());
+        rabbitTemplate.convertAndSend(statisticsExchange.getName(), routingKey, StatisticsEvent.from(candidate));
     }
 
     private String buildRoutingKey(String metricName) {
@@ -37,9 +43,13 @@ public class StatisticsPublisher {
     public record StatisticsEvent(String metric, BigDecimal value, Instant recordedAt) {
 
         private StatisticsEvent {
-            Objects.requireNonNull(metric, "metric must not be null");
-            Objects.requireNonNull(value, "value must not be null");
-            Objects.requireNonNull(recordedAt, "recordedAt must not be null");
+            metric = ValidationUtils.requireTrimmedNotBlank(metric, "metric");
+            if (value == null) {
+                throw MissingRequiredValueException.forField("value");
+            }
+            if (recordedAt == null) {
+                throw MissingRequiredValueException.forField("recordedAt");
+            }
         }
 
         public static StatisticsEvent from(StatisticsEntry entry) {

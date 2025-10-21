@@ -8,10 +8,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 
 @Entity
 @Table(name = "exchange_rates",
@@ -29,15 +30,19 @@ public class ExchangeRateEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(name = "base_currency", nullable = false, length = 3)
     private String baseCurrency;
 
+    @NotBlank
     @Column(name = "target_currency", nullable = false, length = 3)
     private String targetCurrency;
 
+    @NotNull
     @Column(name = "rate", nullable = false, precision = 19, scale = 6)
     private BigDecimal rate;
 
+    @NotNull
     @Column(name = "recorded_at", nullable = false)
     private Instant recordedAt;
 
@@ -46,10 +51,10 @@ public class ExchangeRateEntity {
     }
 
     public ExchangeRateEntity(String baseCurrency, String targetCurrency, BigDecimal rate, Instant recordedAt) {
-        this.baseCurrency = Objects.requireNonNull(baseCurrency, "baseCurrency");
-        this.targetCurrency = Objects.requireNonNull(targetCurrency, "targetCurrency");
-        this.rate = Objects.requireNonNull(rate, "rate");
-        this.recordedAt = Objects.requireNonNull(recordedAt, "recordedAt");
+        this.baseCurrency = baseCurrency;
+        this.targetCurrency = targetCurrency;
+        this.rate = rate;
+        this.recordedAt = recordedAt;
     }
 
     public Long getId() {

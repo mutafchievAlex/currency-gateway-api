@@ -2,6 +2,7 @@ package com.example.gateway.application;
 
 import com.example.gateway.application.port.ExternalRatesClient;
 import com.example.gateway.application.port.RatesSnapshot;
+import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.domain.ExchangeRate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,11 +34,15 @@ class RatesCollectorServiceTest {
     @Mock
     private ExchangeRateService exchangeRateService;
 
+    @Mock
+    private BeanValidationService validationService;
+
     private RatesCollectorService service;
 
     @BeforeEach
     void setUp() {
-        service = new RatesCollectorService(ratesClient, exchangeRateService);
+        when(validationService.requirePresent(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        service = new RatesCollectorService(ratesClient, exchangeRateService, validationService);
     }
 
     @Test
