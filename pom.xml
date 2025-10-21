@@ -18,7 +18,6 @@
     <description>Currency Gateway multi-module project</description>
 
     <modules>
-        <module>common</module>
         <module>domain</module>
         <module>data-access</module>
         <module>scheduler</module>
