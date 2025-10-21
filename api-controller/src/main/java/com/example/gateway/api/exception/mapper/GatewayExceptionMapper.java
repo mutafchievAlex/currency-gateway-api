@@ -1,10 +1,12 @@
 package com.example.gateway.api.exception.mapper;
 
+import com.example.gateway.api.exception.ApiErrorResponse;
 import com.example.gateway.common.exception.GatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,14 +20,18 @@ public class GatewayExceptionMapper implements ApiExceptionMapper<GatewayExcepti
     }
 
     @Override
-    public ErrorResponse toErrorResponse(Throwable exception) {
+    public ResponseEntity<ApiErrorResponse> toResponse(Throwable exception) {
         GatewayException gatewayException = (GatewayException) exception;
         LOGGER.info("Handled gateway exception: {}", gatewayException.getClass().getSimpleName());
         HttpStatus status = HttpStatus.resolve(gatewayException.getStatusCode());
         if (status == null) {
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        return new ErrorResponse(status, gatewayException.getType(), gatewayException.getMessage());
+        ApiErrorResponse payload = new ApiErrorResponse();
+        payload.setCode(status.value());
+        payload.setType(gatewayException.getType());
+        payload.setMessage(gatewayException.getMessage());
+        return ResponseEntity.status(status).body(payload);
     }
 
     @Override
