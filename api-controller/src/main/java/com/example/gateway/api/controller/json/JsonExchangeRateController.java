@@ -6,9 +6,8 @@ import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
 import com.example.gateway.api.mapper.json.JsonApiMapper;
 import com.example.gateway.application.ExchangeRateQueryApplicationService;
 import com.example.gateway.domain.ExchangeRate;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,28 +33,26 @@ public class JsonExchangeRateController implements JsonExchangeRatesApi {
     }
 
     @Override
-    public Response getCurrentExchangeRate(String requestId,
-                                           String baseCurrency,
-                                           String targetCurrency) {
+    public ResponseEntity<ExchangeRateResponse> getCurrentExchangeRate(String requestId,
+                                                                       String baseCurrency,
+                                                                       String targetCurrency) {
         ExchangeRate rate = exchangeRateQueryService.getCurrentRate(requestId, CURRENT_ENDPOINT, baseCurrency, targetCurrency);
         ExchangeRateResponse body = mapper.toExchangeRateResponse(rate);
-        return Response.ok(body)
+        return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_LOCATION, CURRENT_ENDPOINT)
-                .type(MediaType.APPLICATION_JSON)
-                .build();
+                .body(body);
     }
 
     @Override
-    public Response getExchangeRateHistory(String requestId,
-                                           String baseCurrency,
-                                           String targetCurrency,
-                                           OffsetDateTime start,
-                                           OffsetDateTime end) {
+    public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(String requestId,
+                                                                              String baseCurrency,
+                                                                              String targetCurrency,
+                                                                              OffsetDateTime start,
+                                                                              OffsetDateTime end) {
         List<ExchangeRate> history = exchangeRateQueryService.getHistory(requestId, HISTORY_ENDPOINT, baseCurrency, targetCurrency, start, end);
         ExchangeRateHistoryResponse body = mapper.toHistoryResponse(history);
-        return Response.ok(body)
+        return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_LOCATION, HISTORY_ENDPOINT)
-                .type(MediaType.APPLICATION_JSON)
-                .build();
+                .body(body);
     }
 }

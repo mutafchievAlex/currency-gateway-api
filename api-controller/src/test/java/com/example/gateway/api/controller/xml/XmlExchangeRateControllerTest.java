@@ -1,7 +1,5 @@
 package com.example.gateway.api.controller.xml;
 
-import com.example.gateway.api.config.JaxRsResponseConfigurer;
-import com.example.gateway.api.config.JaxRsResponseReturnValueHandler;
 import com.example.gateway.api.mapper.xml.XmlApiMapper;
 import com.example.gateway.api.support.ExchangeRateTestFixtures;
 import com.example.gateway.application.ExchangeRateQueryApplicationService;
@@ -29,9 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @WebMvcTest(XmlExchangeRateController.class)
-@Import({XmlExchangeRateControllerTest.MapperConfig.class,
-        JaxRsResponseConfigurer.class,
-        JaxRsResponseReturnValueHandler.class})
+@Import(XmlExchangeRateControllerTest.MapperConfig.class)
 class XmlExchangeRateControllerTest {
 
     @Autowired
