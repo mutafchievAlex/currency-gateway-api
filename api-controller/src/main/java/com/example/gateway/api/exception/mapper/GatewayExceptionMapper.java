@@ -1,11 +1,10 @@
-package com.example.gateway.api.error.mapper;
+package com.example.gateway.api.exception.mapper;
 
-import com.example.gateway.api.error.ApiErrorResponse;
 import com.example.gateway.common.exception.GatewayException;
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,19 +18,14 @@ public class GatewayExceptionMapper implements ApiExceptionMapper<GatewayExcepti
     }
 
     @Override
-    public Response toResponse(Throwable exception) {
+    public ErrorResponse toErrorResponse(Throwable exception) {
         GatewayException gatewayException = (GatewayException) exception;
         LOGGER.info("Handled gateway exception: {}", gatewayException.getClass().getSimpleName());
-
-        ApiErrorResponse payload = new ApiErrorResponse();
-        payload.setCode(gatewayException.getStatusCode());
-        payload.setType(gatewayException.getType());
-        payload.setMessage(gatewayException.getMessage());
-
-        return Response.status(gatewayException.getStatusCode())
-                .entity(payload)
-                .type(jakarta.ws.rs.core.MediaType.APPLICATION_JSON)
-                .build();
+        HttpStatus status = HttpStatus.resolve(gatewayException.getStatusCode());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return new ErrorResponse(status, gatewayException.getType(), gatewayException.getMessage());
     }
 
     @Override

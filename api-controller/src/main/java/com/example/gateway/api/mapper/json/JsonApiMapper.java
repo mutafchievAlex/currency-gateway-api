@@ -1,8 +1,8 @@
-package com.example.gateway.api.json.mapper;
+package com.example.gateway.api.mapper.json;
 
 import com.example.gateway.api.json.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
-import com.example.gateway.api.support.ExchangeRatesApiMapper;
+import com.example.gateway.api.mapper.ExchangeRatesApiMapper;
 import com.example.gateway.domain.ExchangeRate;
 import org.mapstruct.Mapper;
 
