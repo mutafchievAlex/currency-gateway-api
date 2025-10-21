@@ -56,10 +56,9 @@ the compose stack.
 
 #### Start PostgreSQL locally
 
-A Docker setup is provided to spin up a PostgreSQL instance that already
-contains the schema required by the gateway. The Docker image is built from the
-repository so that it bundles the same Flyway migrations executed by the Spring
-Boot application at startup.
+A Docker setup is provided to spin up a PostgreSQL instance for local
+development. Flyway manages the schema when the Spring Boot application starts,
+so the container itself does not pre-create any tables.
 
 ```bash
 docker compose -f docker/docker-compose.postgres.yml up --build
@@ -71,9 +70,9 @@ them via the `DB_USERNAME`, `DB_PASSWORD`, and `DB_NAME` environment variables
 when launching the compose stack.
 
 The migrations live under `infrastructure/src/main/resources/db/migration`.
-`V1__create_core_tables.sql` provisions the application tables and is also
-copied into the Docker image so that freshly created containers start with an
-identical schema.
+`V1__create_core_tables.sql` provisions the application tables and is applied by
+Flyway on application startup so that local databases stay in sync with the
+schema expected by the service.
 
 The Spring Boot application entry point is located in the `config` module:
 
