@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 /**
  * Marker base class for 4xx HTTP exceptions thrown by the gateway.

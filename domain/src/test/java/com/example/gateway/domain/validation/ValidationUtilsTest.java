@@ -1,7 +1,7 @@
-package com.example.gateway.common.validation;
+package com.example.gateway.domain.validation;
 
-import com.example.gateway.common.exception.MissingRequiredValueException;
-import com.example.gateway.common.exception.RequestValidationException;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
+import com.example.gateway.domain.exception.RequestValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

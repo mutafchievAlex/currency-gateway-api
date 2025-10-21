@@ -1,4 +1,4 @@
-package com.example.gateway.common.validation;
+package com.example.gateway.domain.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

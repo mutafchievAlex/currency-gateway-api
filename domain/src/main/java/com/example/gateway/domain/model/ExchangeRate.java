@@ -1,8 +1,8 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.common.exception.MissingRequiredValueException;
-import com.example.gateway.common.exception.RequestValidationException;
-import com.example.gateway.common.validation.ValidationUtils;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
+import com.example.gateway.domain.exception.RequestValidationException;
+import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

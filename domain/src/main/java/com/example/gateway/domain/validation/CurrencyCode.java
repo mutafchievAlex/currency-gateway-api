@@ -1,4 +1,4 @@
-package com.example.gateway.common.validation;
+package com.example.gateway.domain.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -15,27 +15,22 @@ import static java.lang.annotation.ElementType.RECORD_COMPONENT;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Validates that a {@link CharSequence} is not blank after being trimmed.
- * <p>
- * This annotation is useful for incoming data where leading or trailing whitespace should
- * be ignored during validation.
- * </p>
+ * Validates that a {@link CharSequence} contains a valid ISO 4217 currency code.
  */
 @Target({FIELD, METHOD, PARAMETER, RECORD_COMPONENT, ANNOTATION_TYPE})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = TrimmedNotBlankValidator.class)
-public @interface TrimmedNotBlank {
+@Constraint(validatedBy = CurrencyCodeValidator.class)
+public @interface CurrencyCode {
 
-    String message() default "must not be blank";
+    String message() default "must be a valid ISO 4217 currency code";
 
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
 
     /**
-     * Allows {@code null} values to pass validation. When {@code false} (the default),
-     * {@code null} values are reported as violations.
+     * Allows {@code null} values to pass validation.
      */
     boolean allowNull() default false;
 }

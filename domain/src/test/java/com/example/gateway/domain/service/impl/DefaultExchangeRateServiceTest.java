@@ -1,6 +1,6 @@
 package com.example.gateway.domain.service.impl;
 
-import com.example.gateway.common.exception.RequestValidationException;
+import com.example.gateway.domain.exception.RequestValidationException;
 import com.example.gateway.domain.exception.ExchangeRateNotFoundException;
 import com.example.gateway.domain.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.domain.model.ExchangeRate;

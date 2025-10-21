@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 /**
  * Base type for validation related problems that should surface as HTTP 400 responses.

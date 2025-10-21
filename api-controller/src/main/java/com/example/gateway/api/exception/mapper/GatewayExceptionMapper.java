@@ -1,7 +1,7 @@
 package com.example.gateway.api.exception.mapper;
 
 import com.example.gateway.api.exception.ApiErrorResponse;
-import com.example.gateway.common.exception.GatewayException;
+import com.example.gateway.domain.exception.GatewayException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;

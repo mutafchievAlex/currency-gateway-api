@@ -1,6 +1,6 @@
 package com.example.gateway.domain.service.impl;
 
-import com.example.gateway.common.validation.ValidationUtils;
+import com.example.gateway.domain.validation.ValidationUtils;
 import com.example.gateway.domain.model.ExchangeRate;
 import com.example.gateway.domain.repository.ExternalRatesClient;
 import com.example.gateway.domain.repository.RatesSnapshot;

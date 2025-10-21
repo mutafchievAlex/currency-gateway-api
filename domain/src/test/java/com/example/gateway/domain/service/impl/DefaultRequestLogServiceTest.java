@@ -1,6 +1,6 @@
 package com.example.gateway.domain.service.impl;
 
-import com.example.gateway.common.exception.DuplicateRequestException;
+import com.example.gateway.domain.exception.DuplicateRequestException;
 import com.example.gateway.domain.model.RequestLog;
 import com.example.gateway.domain.repository.RequestLogRepositoryPort;
 import com.example.gateway.domain.validation.BeanValidationService;

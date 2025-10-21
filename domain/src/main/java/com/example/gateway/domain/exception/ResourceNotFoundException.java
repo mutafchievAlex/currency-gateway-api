@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 /**
  * Signals that a requested resource could not be located.

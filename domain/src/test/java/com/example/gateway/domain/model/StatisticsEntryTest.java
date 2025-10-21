@@ -1,6 +1,6 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

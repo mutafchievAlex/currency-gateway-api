@@ -1,6 +1,6 @@
 package com.example.gateway.config;
 
-import com.example.gateway.common.validation.ValidationUtils;
+import com.example.gateway.domain.validation.ValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;

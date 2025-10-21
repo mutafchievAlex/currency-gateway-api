@@ -1,4 +1,4 @@
-package com.example.gateway.common.exception;
+package com.example.gateway.domain.exception;
 
 /**
  * Indicates that a mandatory value was not provided when required by the system.
