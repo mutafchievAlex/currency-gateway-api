@@ -6,7 +6,7 @@
         <groupId>com.example.gateway</groupId>
         <artifactId>currency-api-gateway-bom</artifactId>
         <version>1.0.0</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>currency-api-gateway-bom/pom.xml</relativePath>
     </parent>
 
     <groupId>com.example.gateway</groupId>
