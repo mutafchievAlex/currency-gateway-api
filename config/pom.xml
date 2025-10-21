@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>com.example.gateway</groupId>
-            <artifactId>infrastructure</artifactId>
+            <artifactId>data-access</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -11,7 +11,7 @@ The project follows Clean Architecture principles and is organized in Maven modu
 - `domain` — core domain model and invariants
 - `application` — use cases orchestrating business logic
 - `common` — shared utilities such as exceptions and mappers
-- `infrastructure` — implementations for persistence, messaging, and external clients
+- `data-access` — persistence adapters, entities, and mappers backed by JPA
 - `scheduler` — background jobs responsible for periodic tasks
 - `api-controller` — unified REST controllers that negotiate JSON and XML payloads
 - `config` — Spring Boot bootstrap module and runtime configuration
@@ -69,7 +69,7 @@ The database is exposed on `localhost:5432` with the default credentials
 them via the `DB_USERNAME`, `DB_PASSWORD`, and `DB_NAME` environment variables
 when launching the compose stack.
 
-The migrations live under `infrastructure/src/main/resources/db/migration`.
+The migrations live under `data-access/src/main/resources/db/migration`.
 `V1__create_core_tables.sql` provisions the application tables and is applied by
 Flyway on application startup so that local databases stay in sync with the
 schema expected by the service.
@@ -96,7 +96,7 @@ These values are resolved via standard Spring Boot configuration properties.
 ### Database schema
 
 The schema is managed via Flyway migrations stored in
-`infrastructure/src/main/resources/db/migration`. The initial migration creates
+`data-access/src/main/resources/db/migration`. The initial migration creates
 the following tables:
 
 - `exchange_rates` — stores individual exchange rate observations together with
