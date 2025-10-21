@@ -15,22 +15,24 @@ import java.util.stream.Collectors;
 public class JpaStatisticsRepositoryAdapter implements StatisticsRepositoryPort {
 
     private final StatisticsRepository repository;
+    private final PersistenceMappers mapper;
 
-    public JpaStatisticsRepositoryAdapter(StatisticsRepository repository) {
+    public JpaStatisticsRepositoryAdapter(StatisticsRepository repository, PersistenceMappers mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public StatisticsEntry save(StatisticsEntry entry) {
-        StatisticsEntryEntity saved = repository.save(PersistenceMappers.toEntity(entry));
-        return PersistenceMappers.toDomain(saved);
+        StatisticsEntryEntity saved = repository.save(mapper.toEntity(entry));
+        return mapper.toDomain(saved);
     }
 
     @Override
     public List<StatisticsEntry> findEntriesWithin(String metricName, Instant start, Instant end) {
         return repository.findByMetricNameAndRecordedAtBetweenOrderByRecordedAtAsc(metricName, start, end)
                 .stream()
-                .map(PersistenceMappers::toDomain)
+                .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
 }

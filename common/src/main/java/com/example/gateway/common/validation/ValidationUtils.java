@@ -1,15 +1,16 @@
 package com.example.gateway.common.validation;
 
+import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.common.exception.RequestValidationException;
+
 import java.util.Currency;
 import java.util.Locale;
-import java.util.Objects;
 
 /**
  * Collection of reusable validation helper methods.
  */
 public final class ValidationUtils {
 
-    private static final String FIELD_MUST_NOT_BE_NULL = "%s must not be null";
     private static final String FIELD_MUST_NOT_BE_BLANK = "%s must not be blank";
     private static final String FIELD_MUST_BE_CURRENCY = "%s must be a valid ISO 4217 currency code";
 
@@ -23,14 +24,17 @@ public final class ValidationUtils {
      * @param value     the value to verify
      * @param fieldName human readable field name used in exception messages
      * @return the trimmed value
-     * @throws NullPointerException     if {@code value} is {@code null}
-     * @throws IllegalArgumentException if {@code value} is blank after trimming
+     * @throws MissingRequiredValueException if {@code value} is {@code null}
+     * @throws RequestValidationException    if {@code value} is blank after trimming
      */
     public static String requireTrimmedNotBlank(String value, String fieldName) {
-        Objects.requireNonNull(value, FIELD_MUST_NOT_BE_NULL.formatted(fieldName));
-        String trimmed = value.trim();
+        if (value == null) {
+            throw MissingRequiredValueException.forField(fieldName);
+        }
+        String candidate = value;
+        String trimmed = candidate.trim();
         if (trimmed.isEmpty()) {
-            throw new IllegalArgumentException(FIELD_MUST_NOT_BE_BLANK.formatted(fieldName));
+            throw new RequestValidationException(FIELD_MUST_NOT_BE_BLANK.formatted(fieldName));
         }
         return trimmed;
     }
@@ -41,8 +45,8 @@ public final class ValidationUtils {
      * @param currencyCode the currency code to validate
      * @param fieldName    human readable field name used in exception messages
      * @return a normalised ISO 4217 currency code
-     * @throws NullPointerException     if {@code currencyCode} is {@code null}
-     * @throws IllegalArgumentException if {@code currencyCode} is blank or not recognised
+     * @throws MissingRequiredValueException if {@code currencyCode} is {@code null}
+     * @throws RequestValidationException    if {@code currencyCode} is blank or not recognised
      */
     public static String normalizeCurrencyCode(String currencyCode, String fieldName) {
         String trimmed = requireTrimmedNotBlank(currencyCode, fieldName);
@@ -50,7 +54,7 @@ public final class ValidationUtils {
         try {
             Currency.getInstance(normalized);
         } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException(FIELD_MUST_BE_CURRENCY.formatted(fieldName), ex);
+            throw new RequestValidationException(FIELD_MUST_BE_CURRENCY.formatted(fieldName), ex);
         }
         return normalized;
     }

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -20,15 +21,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 class ExchangeRateRepositoryTest {
 
+    private static final PersistenceMappers MAPPER = Mappers.getMapper(PersistenceMappers.class);
+
     @Autowired
     private ExchangeRateRepository repository;
 
     @Test
     void saveAndFindLatestByCurrencyPair() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        repository.save(PersistenceMappers.toEntity(new ExchangeRate("USD", "EUR", new BigDecimal("0.9000"), now.minusSeconds(60))));
-        repository.save(PersistenceMappers.toEntity(new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), now)));
-        repository.save(PersistenceMappers.toEntity(new ExchangeRate("USD", "GBP", new BigDecimal("0.8000"), now)));
+        repository.save(MAPPER.toEntity(new ExchangeRate("USD", "EUR", new BigDecimal("0.9000"), now.minusSeconds(60))));
+        repository.save(MAPPER.toEntity(new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), now)));
+        repository.save(MAPPER.toEntity(new ExchangeRate("USD", "GBP", new BigDecimal("0.8000"), now)));
 
         ExchangeRateEntity latest = repository
                 .findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc("USD", "EUR")
@@ -44,9 +47,9 @@ class ExchangeRateRepositoryTest {
         ExchangeRate older = new ExchangeRate("USD", "CAD", new BigDecimal("1.2500"), now.minusSeconds(120));
         ExchangeRate middle = new ExchangeRate("USD", "CAD", new BigDecimal("1.2600"), now.minusSeconds(60));
         ExchangeRate newer = new ExchangeRate("USD", "CAD", new BigDecimal("1.2700"), now);
-        repository.save(PersistenceMappers.toEntity(older));
-        repository.save(PersistenceMappers.toEntity(middle));
-        repository.save(PersistenceMappers.toEntity(newer));
+        repository.save(MAPPER.toEntity(older));
+        repository.save(MAPPER.toEntity(middle));
+        repository.save(MAPPER.toEntity(newer));
 
         List<ExchangeRateEntity> results = repository
                 .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(
@@ -61,9 +64,9 @@ class ExchangeRateRepositoryTest {
     void preventsDuplicateRecordsForSameTimestamp() {
         Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         ExchangeRate rate = new ExchangeRate("USD", "JPY", new BigDecimal("110.0000"), timestamp);
-        repository.saveAndFlush(PersistenceMappers.toEntity(rate));
+        repository.saveAndFlush(MAPPER.toEntity(rate));
 
-        ExchangeRateEntity duplicate = PersistenceMappers.toEntity(rate);
+        ExchangeRateEntity duplicate = MAPPER.toEntity(rate);
 
         assertThatThrownBy(() -> repository.saveAndFlush(duplicate))
                 .isInstanceOf(DataIntegrityViolationException.class);

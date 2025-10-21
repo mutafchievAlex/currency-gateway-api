@@ -13,20 +13,22 @@ import java.util.Optional;
 public class JpaRequestLogRepositoryAdapter implements RequestLogRepositoryPort {
 
     private final RequestLogRepository repository;
+    private final PersistenceMappers mapper;
 
-    public JpaRequestLogRepositoryAdapter(RequestLogRepository repository) {
+    public JpaRequestLogRepositoryAdapter(RequestLogRepository repository, PersistenceMappers mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public Optional<RequestLog> findByRequestId(String requestId) {
         return repository.findByRequestId(requestId)
-                .map(PersistenceMappers::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
     public RequestLog save(RequestLog log) {
-        RequestLogEntity saved = repository.save(PersistenceMappers.toEntity(log));
-        return PersistenceMappers.toDomain(saved);
+        RequestLogEntity saved = repository.save(mapper.toEntity(log));
+        return mapper.toDomain(saved);
     }
 }

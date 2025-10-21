@@ -1,12 +1,12 @@
 package com.example.gateway.scheduler;
 
 import com.example.gateway.application.RatesCollectorService;
+import com.example.gateway.application.validation.BeanValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -20,11 +20,15 @@ public class RatesScheduler {
 
     private final RatesCollectorService ratesCollectorService;
     private final CollectorJobProperties collectorProperties;
+    private final BeanValidationService validationService;
     private final Lock executionLock = new ReentrantLock();
 
-    public RatesScheduler(RatesCollectorService ratesCollectorService, CollectorJobProperties collectorProperties) {
-        this.ratesCollectorService = Objects.requireNonNull(ratesCollectorService, "ratesCollectorService must not be null");
-        this.collectorProperties = Objects.requireNonNull(collectorProperties, "collectorProperties must not be null");
+    public RatesScheduler(RatesCollectorService ratesCollectorService,
+                          CollectorJobProperties collectorProperties,
+                          BeanValidationService validationService) {
+        this.validationService = validationService;
+        this.ratesCollectorService = validationService.requirePresent(ratesCollectorService, "ratesCollectorService");
+        this.collectorProperties = validationService.requirePresent(collectorProperties, "collectorProperties");
     }
 
     @Scheduled(fixedRateString = "${collector.interval}")

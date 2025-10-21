@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.mapstruct.factory.Mappers;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -18,13 +19,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @DataJpaTest
 class RequestLogRepositoryTest {
 
+    private static final PersistenceMappers MAPPER = Mappers.getMapper(PersistenceMappers.class);
+
     @Autowired
     private RequestLogRepository repository;
 
     @Test
     void savesAndFindsByRequestId() {
         RequestLog log = new RequestLog("req-123", "/rates", "GET", Instant.now().truncatedTo(ChronoUnit.MILLIS));
-        repository.saveAndFlush(PersistenceMappers.toEntity(log));
+        repository.saveAndFlush(MAPPER.toEntity(log));
 
         RequestLogEntity persisted = repository.findByRequestId("req-123").orElseThrow();
 
@@ -36,9 +39,9 @@ class RequestLogRepositoryTest {
     void enforcesUniqueRequestId() {
         Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         RequestLog log = new RequestLog("req-duplicate", "/metrics", "POST", timestamp);
-        repository.saveAndFlush(PersistenceMappers.toEntity(log));
+        repository.saveAndFlush(MAPPER.toEntity(log));
 
-        RequestLogEntity duplicate = PersistenceMappers.toEntity(log);
+        RequestLogEntity duplicate = MAPPER.toEntity(log);
 
         assertThatThrownBy(() -> repository.saveAndFlush(duplicate))
                 .isInstanceOf(DataIntegrityViolationException.class);

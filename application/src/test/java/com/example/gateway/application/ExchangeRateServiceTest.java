@@ -1,6 +1,10 @@
 package com.example.gateway.application;
 
+import com.example.gateway.application.exception.ExchangeRateNotFoundException;
+import com.example.gateway.application.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.application.port.ExchangeRateRepositoryPort;
+import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.common.exception.RequestValidationException;
 import com.example.gateway.domain.ExchangeRate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,9 +20,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +35,9 @@ class ExchangeRateServiceTest {
 
     @Mock
     private ExchangeRateRepositoryPort repository;
+
+    @Mock
+    private BeanValidationService validationService;
 
     @InjectMocks
     private ExchangeRateService service;
@@ -39,6 +49,8 @@ class ExchangeRateServiceTest {
     void setUp() {
         timestamp = Instant.parse("2024-01-01T00:00:00Z");
         rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), timestamp);
+        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(validationService.requirePresent(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -68,10 +80,9 @@ class ExchangeRateServiceTest {
     void findsLatestRate() {
         when(repository.findLatestByPair("USD", "EUR")).thenReturn(Optional.of(rate));
 
-        Optional<ExchangeRate> latest = service.findLatest("usd", "eur");
+        ExchangeRate latest = service.getLatest("usd", "eur");
 
-        assertTrue(latest.isPresent());
-        assertTrue(latest.map(ExchangeRate::timestamp).filter(timestamp::equals).isPresent());
+        assertEquals(timestamp, latest.timestamp());
     }
 
     @Test
@@ -87,8 +98,8 @@ class ExchangeRateServiceTest {
     }
 
     @Test
-    void findLatestRejectsInvalidCurrencyCode() {
-        assertThrows(IllegalArgumentException.class, () -> service.findLatest("US1", "eur"));
+    void getLatestRejectsInvalidCurrencyCode() {
+        assertThrows(RequestValidationException.class, () -> service.getLatest("US1", "eur"));
         verify(repository, never()).findLatestByPair(ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
@@ -97,7 +108,23 @@ class ExchangeRateServiceTest {
         Instant start = timestamp.minus(1, ChronoUnit.DAYS);
         Instant end = timestamp.plus(1, ChronoUnit.DAYS);
 
-        assertThrows(IllegalArgumentException.class, () -> service.findHistory("usd", "EU", start, end));
+        assertThrows(RequestValidationException.class, () -> service.findHistory("usd", "EU", start, end));
+        verify(repository, never()).findWithinRange(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
+    }
+
+    @Test
+    void getLatestThrowsWhenRateMissing() {
+        when(repository.findLatestByPair("USD", "EUR")).thenReturn(Optional.empty());
+
+        assertThrows(ExchangeRateNotFoundException.class, () -> service.getLatest("usd", "eur"));
+    }
+
+    @Test
+    void findHistoryRejectsInvalidRange() {
+        Instant start = timestamp.plus(1, ChronoUnit.DAYS);
+        Instant end = timestamp;
+
+        assertThrows(InvalidExchangeRateQueryException.class, () -> service.findHistory("usd", "eur", start, end));
         verify(repository, never()).findWithinRange(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 }

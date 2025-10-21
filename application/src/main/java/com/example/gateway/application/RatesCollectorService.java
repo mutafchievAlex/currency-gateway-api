@@ -2,6 +2,8 @@ package com.example.gateway.application;
 
 import com.example.gateway.application.port.ExternalRatesClient;
 import com.example.gateway.application.port.RatesSnapshot;
+import com.example.gateway.application.validation.BeanValidationService;
+import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.ExchangeRate;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +22,26 @@ public class RatesCollectorService {
 
     private final ExternalRatesClient externalRatesClient;
     private final ExchangeRateService exchangeRateService;
+    private final BeanValidationService validationService;
 
-    public RatesCollectorService(ExternalRatesClient externalRatesClient, ExchangeRateService exchangeRateService) {
-        this.externalRatesClient = Objects.requireNonNull(externalRatesClient, "externalRatesClient must not be null");
-        this.exchangeRateService = Objects.requireNonNull(exchangeRateService, "exchangeRateService must not be null");
+    public RatesCollectorService(ExternalRatesClient externalRatesClient,
+                                 ExchangeRateService exchangeRateService,
+                                 BeanValidationService validationService) {
+        this.validationService = validationService;
+        this.externalRatesClient = validationService.requirePresent(externalRatesClient, "externalRatesClient");
+        this.exchangeRateService = validationService.requirePresent(exchangeRateService, "exchangeRateService");
     }
 
     public void collectLatestRates(String baseCurrency, Collection<String> targetCurrencies) {
-        Objects.requireNonNull(baseCurrency, "baseCurrency must not be null");
-        Objects.requireNonNull(targetCurrencies, "targetCurrencies must not be null");
+        String normalizedBase = ValidationUtils.requireTrimmedNotBlank(baseCurrency, "baseCurrency").toUpperCase(Locale.ROOT);
+        Collection<String> safeTargets = validationService.requirePresent(targetCurrencies, "targetCurrencies");
 
-        Set<String> normalizedTargets = targetCurrencies.stream()
+        Set<String> normalizedTargets = safeTargets.stream()
                 .filter(Objects::nonNull)
                 .map(currency -> currency.trim().toUpperCase(Locale.ROOT))
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toSet());
 
-        String normalizedBase = baseCurrency.trim().toUpperCase(Locale.ROOT);
         RatesSnapshot snapshot = externalRatesClient.fetchLatestRates(normalizedBase, normalizedTargets);
 
         snapshot.rates().forEach((targetCurrency, rateValue) -> {

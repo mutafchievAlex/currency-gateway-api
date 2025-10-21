@@ -1,21 +1,24 @@
 package com.example.gateway.api.support;
 
+import com.example.gateway.common.exception.MissingRequiredValueException;
 import com.example.gateway.common.validation.ValidationUtils;
 import com.example.gateway.domain.RequestLog;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Objects;
 
 public interface ApiMappingSupport {
 
     default RequestLog toRequestLog(String requestId, String endpoint, String httpMethod, Instant timestamp) {
-        Objects.requireNonNull(requestId, "requestId must not be null");
-        Objects.requireNonNull(endpoint, "endpoint must not be null");
-        Objects.requireNonNull(httpMethod, "httpMethod must not be null");
-        Objects.requireNonNull(timestamp, "timestamp must not be null");
-        return new RequestLog(requestId.trim(), endpoint, httpMethod, timestamp);
+        String safeRequestId = ValidationUtils.requireTrimmedNotBlank(requestId, "requestId");
+        String safeEndpoint = ValidationUtils.requireTrimmedNotBlank(endpoint, "endpoint");
+        String safeMethod = ValidationUtils.requireTrimmedNotBlank(httpMethod, "httpMethod");
+        if (timestamp == null) {
+            throw MissingRequiredValueException.forField("timestamp");
+        }
+        Instant safeTimestamp = timestamp;
+        return new RequestLog(safeRequestId, safeEndpoint, safeMethod, safeTimestamp);
     }
 
     default String normalizeCurrency(String currency) {

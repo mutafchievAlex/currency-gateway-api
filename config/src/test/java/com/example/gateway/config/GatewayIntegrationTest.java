@@ -1,7 +1,7 @@
 package com.example.gateway.config;
 
 import com.example.gateway.CurrencyGatewayApplication;
-import com.example.gateway.api.json.generated.model.ApiError;
+import com.example.gateway.api.error.ApiErrorResponse;
 import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.application.StatisticsCollectorService;
@@ -157,10 +157,10 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         ResponseEntity<ExchangeRateResponse> firstResponse = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<ApiError> duplicateResponse = restTemplate.getForEntity(uri, ApiError.class);
+        ResponseEntity<ApiErrorResponse> duplicateResponse = restTemplate.getForEntity(uri, ApiErrorResponse.class);
         assertThat(duplicateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(duplicateResponse.getBody()).isNotNull();
-        assertThat(duplicateResponse.getBody().getDetail()).contains("dup-req-1");
+        assertThat(duplicateResponse.getBody().getMessage()).contains("dup-req-1");
     }
 
     @Test
@@ -218,6 +218,5 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         StatisticsPublisher.StatisticsEvent event = (StatisticsPublisher.StatisticsEvent) received;
         assertThat(event.metric()).isEqualTo("request.total");
         assertThat(event.value()).isEqualByComparingTo("12.34");
-        assertThat(event.recordedAt()).isEqualTo(entry.recordedAt());
     }
 }

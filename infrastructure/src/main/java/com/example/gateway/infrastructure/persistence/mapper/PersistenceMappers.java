@@ -6,79 +6,25 @@ import com.example.gateway.domain.StatisticsEntry;
 import com.example.gateway.infrastructure.persistence.entity.ExchangeRateEntity;
 import com.example.gateway.infrastructure.persistence.entity.RequestLogEntity;
 import com.example.gateway.infrastructure.persistence.entity.StatisticsEntryEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public final class PersistenceMappers {
+@Mapper(componentModel = "spring")
+public interface PersistenceMappers {
 
-    private PersistenceMappers() {
-    }
+    @Mapping(target = "recordedAt", source = "timestamp")
+    ExchangeRateEntity toEntity(ExchangeRate rate);
 
-    public static ExchangeRateEntity toEntity(ExchangeRate rate) {
-        if (rate == null) {
-            return null;
-        }
-        return new ExchangeRateEntity(
-                rate.baseCurrency(),
-                rate.targetCurrency(),
-                rate.rate(),
-                rate.timestamp()
-        );
-    }
+    @Mapping(target = "timestamp", source = "recordedAt")
+    ExchangeRate toDomain(ExchangeRateEntity entity);
 
-    public static ExchangeRate toDomain(ExchangeRateEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new ExchangeRate(
-                entity.getBaseCurrency(),
-                entity.getTargetCurrency(),
-                entity.getRate(),
-                entity.getRecordedAt()
-        );
-    }
+    RequestLogEntity toEntity(RequestLog log);
 
-    public static RequestLogEntity toEntity(RequestLog log) {
-        if (log == null) {
-            return null;
-        }
-        return new RequestLogEntity(
-                log.requestId(),
-                log.endpoint(),
-                log.httpMethod(),
-                log.timestamp()
-        );
-    }
+    RequestLog toDomain(RequestLogEntity entity);
 
-    public static RequestLog toDomain(RequestLogEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new RequestLog(
-                entity.getRequestId(),
-                entity.getEndpoint(),
-                entity.getHttpMethod(),
-                entity.getLoggedAt()
-        );
-    }
+    @Mapping(target = "metric", source = "metricName")
+    StatisticsEntryEntity toEntity(StatisticsEntry entry);
 
-    public static StatisticsEntryEntity toEntity(StatisticsEntry entry) {
-        if (entry == null) {
-            return null;
-        }
-        return new StatisticsEntryEntity(
-                entry.metricName(),
-                entry.value(),
-                entry.recordedAt()
-        );
-    }
-
-    public static StatisticsEntry toDomain(StatisticsEntryEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new StatisticsEntry(
-                entity.getMetricName(),
-                entity.getValue(),
-                entity.getRecordedAt()
-        );
-    }
+    @Mapping(target = "metricName", source = "metric")
+    StatisticsEntry toDomain(StatisticsEntryEntity entity);
 }

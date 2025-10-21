@@ -7,21 +7,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Objects;
 
 @Entity
 @Table(name = "statistics_entries",
         indexes = {
-                @Index(name = "idx_statistics_entries_metric", columnList = "metric_name"),
-                @Index(name = "idx_statistics_entries_recorded_at", columnList = "recorded_at")
-        },
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_statistics_entries_metric_timestamp",
-                        columnNames = {"metric_name", "recorded_at"})
+                @Index(name = "idx_statistics_metric", columnList = "metric"),
+                @Index(name = "idx_statistics_recorded_at", columnList = "recorded_at")
         })
 public class StatisticsEntryEntity {
 
@@ -29,12 +25,15 @@ public class StatisticsEntryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "metric_name", nullable = false, length = 100)
-    private String metricName;
+    @NotBlank
+    @Column(name = "metric", nullable = false)
+    private String metric;
 
-    @Column(name = "metric_value", nullable = false, precision = 19, scale = 6)
+    @NotNull
+    @Column(name = "value", nullable = false, precision = 19, scale = 6)
     private BigDecimal value;
 
+    @NotNull
     @Column(name = "recorded_at", nullable = false)
     private Instant recordedAt;
 
@@ -42,22 +41,22 @@ public class StatisticsEntryEntity {
         // JPA
     }
 
-    public StatisticsEntryEntity(String metricName, BigDecimal value, Instant recordedAt) {
-        this.metricName = Objects.requireNonNull(metricName, "metricName");
-        this.value = Objects.requireNonNull(value, "value");
-        this.recordedAt = Objects.requireNonNull(recordedAt, "recordedAt");
+    public StatisticsEntryEntity(String metric, BigDecimal value, Instant recordedAt) {
+        this.metric = metric;
+        this.value = value;
+        this.recordedAt = recordedAt;
     }
 
     public Long getId() {
         return id;
     }
 
-    public String getMetricName() {
-        return metricName;
+    public String getMetric() {
+        return metric;
     }
 
-    public void setMetricName(String metricName) {
-        this.metricName = metricName;
+    public void setMetric(String metric) {
+        this.metric = metric;
     }
 
     public BigDecimal getValue() {

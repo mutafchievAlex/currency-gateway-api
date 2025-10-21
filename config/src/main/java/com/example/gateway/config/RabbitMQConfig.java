@@ -1,5 +1,6 @@
 package com.example.gateway.config;
 
+import com.example.gateway.common.validation.ValidationUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -12,8 +13,6 @@ import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Objects;
-
 /**
  * Configures RabbitMQ components used by the application.
  */
@@ -25,8 +24,8 @@ public class RabbitMQConfig {
 
     public RabbitMQConfig(RabbitProperties rabbitProperties,
                           @Value("${spring.rabbitmq.template.exchange}") String exchangeName) {
-        this.rabbitProperties = Objects.requireNonNull(rabbitProperties, "rabbitProperties must not be null");
-        this.exchangeName = Objects.requireNonNull(exchangeName, "exchangeName must not be null");
+        this.rabbitProperties = rabbitProperties;
+        this.exchangeName = ValidationUtils.requireTrimmedNotBlank(exchangeName, "exchangeName");
     }
 
     @Bean

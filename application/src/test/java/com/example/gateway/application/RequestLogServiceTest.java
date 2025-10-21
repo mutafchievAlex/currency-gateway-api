@@ -1,6 +1,7 @@
 package com.example.gateway.application;
 
 import com.example.gateway.application.port.RequestLogRepositoryPort;
+import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.common.exception.DuplicateRequestException;
 import com.example.gateway.domain.RequestLog;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +28,9 @@ class RequestLogServiceTest {
     @Mock
     private RequestLogRepositoryPort repository;
 
+    @Mock
+    private BeanValidationService validationService;
+
     @InjectMocks
     private RequestLogService service;
 
@@ -33,6 +39,7 @@ class RequestLogServiceTest {
     @BeforeEach
     void setUp() {
         log = new RequestLog("req-1", "/rates", "GET", Instant.parse("2024-03-15T10:15:30Z"));
+        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

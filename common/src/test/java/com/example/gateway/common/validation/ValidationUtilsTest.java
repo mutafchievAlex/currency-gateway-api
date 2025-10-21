@@ -1,5 +1,7 @@
 package com.example.gateway.common.validation;
 
+import com.example.gateway.common.exception.MissingRequiredValueException;
+import com.example.gateway.common.exception.RequestValidationException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,12 +17,12 @@ class ValidationUtilsTest {
 
     @Test
     void requireTrimmedNotBlankThrowsForNull() {
-        assertThrows(NullPointerException.class, () -> ValidationUtils.requireTrimmedNotBlank(null, "field"));
+        assertThrows(MissingRequiredValueException.class, () -> ValidationUtils.requireTrimmedNotBlank(null, "field"));
     }
 
     @Test
     void requireTrimmedNotBlankThrowsForBlank() {
-        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.requireTrimmedNotBlank("   ", "field"));
+        assertThrows(RequestValidationException.class, () -> ValidationUtils.requireTrimmedNotBlank("   ", "field"));
     }
 
     @Test
@@ -31,11 +33,11 @@ class ValidationUtilsTest {
 
     @Test
     void normalizeCurrencyCodeThrowsForNull() {
-        assertThrows(NullPointerException.class, () -> ValidationUtils.normalizeCurrencyCode(null, "currency"));
+        assertThrows(MissingRequiredValueException.class, () -> ValidationUtils.normalizeCurrencyCode(null, "currency"));
     }
 
     @Test
     void normalizeCurrencyCodeThrowsForInvalidCode() {
-        assertThrows(IllegalArgumentException.class, () -> ValidationUtils.normalizeCurrencyCode("ZZZ1", "currency"));
-    }
+        assertThrows(RequestValidationException.class, () -> ValidationUtils.normalizeCurrencyCode("ZZZ1", "currency"));
+}
 }

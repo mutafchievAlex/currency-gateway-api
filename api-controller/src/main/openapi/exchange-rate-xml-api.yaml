@@ -27,6 +27,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/exchange-rates/history:
     get:
       tags:
@@ -52,6 +54,8 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   parameters:
     RequestId:
@@ -60,6 +64,7 @@ components:
       required: true
       schema:
         type: string
+        minLength: 1
       description: Unique identifier for the request
     BaseCurrency:
       name: baseCurrency
@@ -101,19 +106,25 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
     NotFound:
       description: Requested exchange rate not found
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
     Conflict:
       description: Duplicate request identifier detected
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/ApiError'
+            $ref: '#/components/schemas/ApiErrorResponse'
+    InternalServerError:
+      description: Unexpected server-side failure
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ApiErrorResponse'
   schemas:
     ExchangeRateResponse:
       type: object
@@ -159,25 +170,25 @@ components:
             $ref: '#/components/schemas/ExchangeRateResponse'
             xml:
               name: rate
-    ApiError:
+    ApiErrorResponse:
       type: object
       xml:
         name: error
       required:
-        - title
-        - status
-        - detail
+        - code
+        - type
+        - message
       properties:
-        title:
-          type: string
-          xml:
-            name: title
-        status:
+        code:
           type: integer
           format: int32
           xml:
-            name: status
-        detail:
+            name: code
+        type:
           type: string
           xml:
-            name: detail
+            name: type
+        message:
+          type: string
+          xml:
+            name: message

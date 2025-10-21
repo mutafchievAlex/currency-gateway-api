@@ -1,6 +1,7 @@
 package com.example.gateway.application;
 
 import com.example.gateway.application.port.StatisticsRepositoryPort;
+import com.example.gateway.application.validation.BeanValidationService;
 import com.example.gateway.domain.StatisticsEntry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,8 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +26,9 @@ class StatisticsCollectorServiceTest {
     @Mock
     private StatisticsRepositoryPort repository;
 
+    @Mock
+    private BeanValidationService validationService;
+
     @InjectMocks
     private StatisticsCollectorService service;
 
@@ -31,6 +37,8 @@ class StatisticsCollectorServiceTest {
     @BeforeEach
     void setUp() {
         entry = new StatisticsEntry("requests", new BigDecimal("42"), Instant.parse("2024-03-15T10:15:30Z"));
+        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(validationService.requirePresent(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test

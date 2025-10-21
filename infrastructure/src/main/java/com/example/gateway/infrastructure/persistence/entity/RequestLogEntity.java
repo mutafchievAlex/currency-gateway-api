@@ -7,19 +7,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
-import java.util.Objects;
 
 @Entity
 @Table(name = "request_logs",
         indexes = {
-                @Index(name = "idx_request_logs_timestamp", columnList = "logged_at"),
-                @Index(name = "idx_request_logs_endpoint", columnList = "endpoint")
-        },
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_request_logs_request_id", columnNames = "request_id")
+                @Index(name = "idx_request_logs_timestamp", columnList = "timestamp")
         })
 public class RequestLogEntity {
 
@@ -27,27 +23,31 @@ public class RequestLogEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "request_id", nullable = false, length = 100)
+    @NotBlank
+    @Column(name = "request_id", nullable = false, unique = true)
     private String requestId;
 
-    @Column(name = "endpoint", nullable = false, length = 255)
+    @NotBlank
+    @Column(name = "endpoint", nullable = false)
     private String endpoint;
 
-    @Column(name = "http_method", nullable = false, length = 10)
+    @NotBlank
+    @Column(name = "http_method", nullable = false)
     private String httpMethod;
 
-    @Column(name = "logged_at", nullable = false)
-    private Instant loggedAt;
+    @NotNull
+    @Column(name = "timestamp", nullable = false)
+    private Instant timestamp;
 
     protected RequestLogEntity() {
         // JPA
     }
 
-    public RequestLogEntity(String requestId, String endpoint, String httpMethod, Instant loggedAt) {
-        this.requestId = Objects.requireNonNull(requestId, "requestId");
-        this.endpoint = Objects.requireNonNull(endpoint, "endpoint");
-        this.httpMethod = Objects.requireNonNull(httpMethod, "httpMethod");
-        this.loggedAt = Objects.requireNonNull(loggedAt, "loggedAt");
+    public RequestLogEntity(String requestId, String endpoint, String httpMethod, Instant timestamp) {
+        this.requestId = requestId;
+        this.endpoint = endpoint;
+        this.httpMethod = httpMethod;
+        this.timestamp = timestamp;
     }
 
     public Long getId() {
@@ -78,11 +78,11 @@ public class RequestLogEntity {
         this.httpMethod = httpMethod;
     }
 
-    public Instant getLoggedAt() {
-        return loggedAt;
+    public Instant getTimestamp() {
+        return timestamp;
     }
 
-    public void setLoggedAt(Instant loggedAt) {
-        this.loggedAt = loggedAt;
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 }
