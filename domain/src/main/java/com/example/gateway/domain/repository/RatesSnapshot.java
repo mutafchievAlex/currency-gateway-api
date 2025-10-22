@@ -1,7 +1,5 @@
 package com.example.gateway.domain.repository;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
-import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -17,13 +15,14 @@ public record RatesSnapshot(@NotBlank String baseCurrency,
                             @NotNull Map<String, BigDecimal> rates) {
 
     public RatesSnapshot {
-        baseCurrency = ValidationUtils.requireTrimmedNotBlank(baseCurrency, "baseCurrency");
-        if (timestamp == null) {
-            throw MissingRequiredValueException.forField("timestamp");
+        baseCurrency = normalize(baseCurrency);
+        rates = rates == null ? null : Map.copyOf(rates);
+    }
+
+    private static String normalize(String value) {
+        if (value == null) {
+            return null;
         }
-        if (rates == null) {
-            throw MissingRequiredValueException.forField("rates");
-        }
-        rates = Map.copyOf(rates);
+        return value.trim();
     }
 }

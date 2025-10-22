@@ -1,6 +1,8 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
+import com.example.gateway.domain.validation.BeanValidationService;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -8,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,15 +28,15 @@ class StatisticsEntryTest {
     }
 
     @Test
-    @DisplayName("constructor rejects null arguments")
-    void constructorRejectsNulls() {
-        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
+    @DisplayName("bean validation reports missing statistic details")
+    void beanValidationDetectsInvalidValues() {
+        BeanValidationService validationService =
+                new BeanValidationService(Validation.buildDefaultValidatorFactory().getValidator());
+        StatisticsEntry entry = new StatisticsEntry(" ", null, null);
 
-        assertThrows(MissingRequiredValueException.class,
-                () -> new StatisticsEntry(null, BigDecimal.ONE, timestamp));
-        assertThrows(MissingRequiredValueException.class,
-                () -> new StatisticsEntry("request.count", null, timestamp));
-        assertThrows(MissingRequiredValueException.class,
-                () -> new StatisticsEntry("request.count", BigDecimal.ONE, null));
+        ConstraintViolationException exception =
+                assertThrows(ConstraintViolationException.class, () -> validationService.requireValid(entry, "entry"));
+
+        assertFalse(exception.getConstraintViolations().isEmpty());
     }
 }

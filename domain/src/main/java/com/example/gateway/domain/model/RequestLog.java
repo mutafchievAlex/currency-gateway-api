@@ -1,7 +1,5 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
-import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -29,10 +27,10 @@ public final class RequestLog {
                       String endpoint,
                       String httpMethod,
                       Instant timestamp) {
-        this.requestId = ValidationUtils.requireTrimmedNotBlank(requestId, "requestId");
-        this.endpoint = ValidationUtils.requireTrimmedNotBlank(endpoint, "endpoint");
-        this.httpMethod = ValidationUtils.requireTrimmedNotBlank(httpMethod, "httpMethod");
-        this.timestamp = requireTimestamp(timestamp);
+        this.requestId = normalize(requestId);
+        this.endpoint = normalize(endpoint);
+        this.httpMethod = normalize(httpMethod);
+        this.timestamp = timestamp;
     }
 
     public String requestId() {
@@ -51,11 +49,11 @@ public final class RequestLog {
         return timestamp;
     }
 
-    private static Instant requireTimestamp(Instant timestamp) {
-        if (timestamp == null) {
-            throw MissingRequiredValueException.forField("timestamp");
+    private static String normalize(String value) {
+        if (value == null) {
+            return null;
         }
-        return timestamp;
+        return value.trim();
     }
 
     @Override

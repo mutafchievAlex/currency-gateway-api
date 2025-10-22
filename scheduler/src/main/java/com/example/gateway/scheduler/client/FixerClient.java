@@ -34,9 +34,12 @@ public class FixerClient implements ExternalRatesClient {
                        @Value("${fixer.api-key}") String apiKey,
                        BeanValidationService validationService) {
         this.validationService = validationService;
-        String normalizedBaseUrl = ValidationUtils.requireTrimmedNotBlank(baseUrl, "baseUrl");
-        this.restClient = builder.baseUrl(normalizedBaseUrl).build();
-        this.apiKey = ValidationUtils.requireTrimmedNotBlank(apiKey, "apiKey");
+        RestClient.Builder restClientBuilder = builder;
+        if (baseUrl != null) {
+            restClientBuilder = restClientBuilder.baseUrl(baseUrl.trim());
+        }
+        this.restClient = restClientBuilder.build();
+        this.apiKey = apiKey == null ? null : apiKey.trim();
     }
 
     @Override
