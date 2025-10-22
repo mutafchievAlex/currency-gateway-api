@@ -21,20 +21,20 @@ public final class StatisticsEntry {
     private final BigDecimal value;
 
     @NotNull
-    private final Instant recordedAt;
+    private final Instant timestamp;
 
     public StatisticsEntry(String metricName,
                            BigDecimal value,
-                           Instant recordedAt) {
+                           Instant timestamp) {
         this.metricName = ValidationUtils.requireTrimmedNotBlank(metricName, "metricName");
         if (value == null) {
             throw MissingRequiredValueException.forField("value");
         }
-        if (recordedAt == null) {
-            throw MissingRequiredValueException.forField("recordedAt");
+        if (timestamp == null) {
+            throw MissingRequiredValueException.forField("timestamp");
         }
         this.value = value;
-        this.recordedAt = recordedAt;
+        this.timestamp = timestamp;
     }
 
     public String metricName() {
@@ -45,8 +45,8 @@ public final class StatisticsEntry {
         return value;
     }
 
-    public Instant recordedAt() {
-        return recordedAt;
+    public Instant timestamp() {
+        return timestamp;
     }
 
     @Override
@@ -59,12 +59,12 @@ public final class StatisticsEntry {
         }
         return Objects.equals(metricName, that.metricName)
                 && Objects.equals(value, that.value)
-                && Objects.equals(recordedAt, that.recordedAt);
+                && Objects.equals(timestamp, that.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(metricName, value, recordedAt);
+        return Objects.hash(metricName, value, timestamp);
     }
 
     @Override
@@ -72,7 +72,7 @@ public final class StatisticsEntry {
         return "StatisticsEntry{" +
                 "metricName='" + metricName + '\'' +
                 ", value=" + value +
-                ", recordedAt=" + recordedAt +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

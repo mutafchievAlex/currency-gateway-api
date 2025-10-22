@@ -33,7 +33,7 @@ class StatisticsRepositoryTest {
         repository.save(MAPPER.toEntity(new StatisticsEntry("errors", new BigDecimal("1.0"), now)));
 
         List<StatisticsEntryEntity> entries = repository
-                .findByMetricNameAndRecordedAtBetweenOrderByRecordedAtAsc("requests", now.minusSeconds(90), now.plusSeconds(1));
+                .findByMetricNameAndTimestampBetweenOrderByTimestampAsc("requests", now.minusSeconds(90), now.plusSeconds(1));
 
         assertThat(entries).hasSize(2);
         assertThat(entries.get(0).getValue()).isEqualByComparingTo("2.0");

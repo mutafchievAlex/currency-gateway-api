@@ -9,15 +9,15 @@ import java.util.Optional;
 
 public interface ExchangeRateRepository extends JpaRepository<ExchangeRateEntity, Long> {
 
-    Optional<ExchangeRateEntity> findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc(String baseCurrency,
-                                                                                                String targetCurrency);
+    Optional<ExchangeRateEntity> findFirstByBaseCurrencyAndTargetCurrencyOrderByTimestampDesc(String baseCurrency,
+                                                                                              String targetCurrency);
 
-    Optional<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndRecordedAt(String baseCurrency,
+    Optional<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndTimestamp(String baseCurrency,
                                                                                   String targetCurrency,
-                                                                                  Instant recordedAt);
+                                                                                  Instant timestamp);
 
-    List<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(String baseCurrency,
-                                                                                                         String targetCurrency,
-                                                                                                         Instant start,
-                                                                                                         Instant end);
+    List<ExchangeRateEntity> findByBaseCurrencyAndTargetCurrencyAndTimestampBetweenOrderByTimestampAsc(String baseCurrency,
+                                                                                                       String targetCurrency,
+                                                                                                       Instant start,
+                                                                                                       Instant end);
 }

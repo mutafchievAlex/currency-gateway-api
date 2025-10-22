@@ -24,7 +24,7 @@ public class JpaExchangeRateRepositoryAdapter implements ExchangeRateRepositoryP
 
     @Override
     public Optional<ExchangeRate> findByPairAndTimestamp(String baseCurrency, String targetCurrency, Instant timestamp) {
-        return repository.findByBaseCurrencyAndTargetCurrencyAndRecordedAt(baseCurrency, targetCurrency, timestamp)
+        return repository.findByBaseCurrencyAndTargetCurrencyAndTimestamp(baseCurrency, targetCurrency, timestamp)
                 .map(mapper::toDomain);
     }
 
@@ -36,14 +36,14 @@ public class JpaExchangeRateRepositoryAdapter implements ExchangeRateRepositoryP
 
     @Override
     public Optional<ExchangeRate> findLatestByPair(String baseCurrency, String targetCurrency) {
-        return repository.findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc(baseCurrency, targetCurrency)
+        return repository.findFirstByBaseCurrencyAndTargetCurrencyOrderByTimestampDesc(baseCurrency, targetCurrency)
                 .map(mapper::toDomain);
     }
 
     @Override
     public List<ExchangeRate> findWithinRange(String baseCurrency, String targetCurrency, Instant start, Instant end) {
         return repository
-                .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(baseCurrency, targetCurrency, start, end)
+                .findByBaseCurrencyAndTargetCurrencyAndTimestampBetweenOrderByTimestampAsc(baseCurrency, targetCurrency, start, end)
                 .stream()
                 .map(mapper::toDomain)
                 .toList();

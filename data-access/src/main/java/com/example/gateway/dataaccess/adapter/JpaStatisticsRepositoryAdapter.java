@@ -30,7 +30,7 @@ public class JpaStatisticsRepositoryAdapter implements StatisticsRepositoryPort 
 
     @Override
     public List<StatisticsEntry> findEntriesWithin(String metricName, Instant start, Instant end) {
-        return repository.findByMetricNameAndRecordedAtBetweenOrderByRecordedAtAsc(metricName, start, end)
+        return repository.findByMetricNameAndTimestampBetweenOrderByTimestampAsc(metricName, start, end)
                 .stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
