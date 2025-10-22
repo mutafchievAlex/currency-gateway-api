@@ -24,12 +24,10 @@ public interface PersistenceMappers {
 
     RequestLog toDomain(RequestLogEntity entity);
 
-    @Mapping(target = "metric", source = "metricName")
-    @Mapping(target = "recordedAt", source = "entry", qualifiedByName = "statisticsEntryRecordedAt")
+    @Mapping(target = "metric", expression = "java(entry.metricName())")
     StatisticsEntryEntity toEntity(StatisticsEntry entry);
 
-    @Mapping(target = "metricName", source = "metric")
-    @Mapping(target = "recordedAt", source = "entity", qualifiedByName = "statisticsEntryEntityRecordedAt")
+    @Mapping(target = "metricName", expression = "java(entity.getMetric())")
     StatisticsEntry toDomain(StatisticsEntryEntity entity);
 
     @Named("exchangeRateTimestamp")
