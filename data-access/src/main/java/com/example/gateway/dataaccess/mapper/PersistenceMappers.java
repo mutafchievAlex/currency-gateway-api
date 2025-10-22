@@ -12,19 +12,19 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PersistenceMappers {
 
-    @Mapping(target = "recordedAt", source = "timestamp")
+    @Mapping(target = "recordedAt", expression = "java(rate.timestamp())")
     ExchangeRateEntity toEntity(ExchangeRate rate);
 
-    @Mapping(target = "timestamp", source = "recordedAt")
+    @Mapping(target = "timestamp", expression = "java(entity.getRecordedAt())")
     ExchangeRate toDomain(ExchangeRateEntity entity);
 
     RequestLogEntity toEntity(RequestLog log);
 
     RequestLog toDomain(RequestLogEntity entity);
 
-    @Mapping(target = "metric", source = "metricName")
+    @Mapping(target = "metric", expression = "java(entry.metricName())")
     StatisticsEntryEntity toEntity(StatisticsEntry entry);
 
-    @Mapping(target = "metricName", source = "metric")
+    @Mapping(target = "metricName", expression = "java(entity.getMetric())")
     StatisticsEntry toDomain(StatisticsEntryEntity entity);
 }
