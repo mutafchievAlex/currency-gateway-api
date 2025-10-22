@@ -1,7 +1,5 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
-import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -26,13 +24,7 @@ public final class StatisticsEntry {
     public StatisticsEntry(String metricName,
                            BigDecimal value,
                            Instant timestamp) {
-        this.metricName = ValidationUtils.requireTrimmedNotBlank(metricName, "metricName");
-        if (value == null) {
-            throw MissingRequiredValueException.forField("value");
-        }
-        if (timestamp == null) {
-            throw MissingRequiredValueException.forField("timestamp");
-        }
+        this.metricName = normalize(metricName);
         this.value = value;
         this.timestamp = timestamp;
     }
@@ -47,6 +39,13 @@ public final class StatisticsEntry {
 
     public Instant timestamp() {
         return timestamp;
+    }
+
+    private static String normalize(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.trim();
     }
 
     @Override

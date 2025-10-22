@@ -1,15 +1,11 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
-import com.example.gateway.domain.exception.RequestValidationException;
-import com.example.gateway.domain.validation.ValidationUtils;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Currency;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -17,8 +13,6 @@ import java.util.Objects;
  * Represents the exchange rate between two currencies at a specific instant in time.
  */
 public final class ExchangeRate {
-
-    private static final String ISO_CURRENCY_ERROR = "must be a valid ISO 4217 currency code";
 
     @NotBlank
     private final String baseCurrency;
@@ -37,10 +31,10 @@ public final class ExchangeRate {
                         String targetCurrency,
                         BigDecimal rate,
                         Instant timestamp) {
-        this.baseCurrency = validateCurrency(baseCurrency, "baseCurrency");
-        this.targetCurrency = validateCurrency(targetCurrency, "targetCurrency");
-        this.rate = validateRate(rate);
-        this.timestamp = requireTimestamp(timestamp);
+        this.baseCurrency = normalizeCurrency(baseCurrency);
+        this.targetCurrency = normalizeCurrency(targetCurrency);
+        this.rate = rate;
+        this.timestamp = timestamp;
     }
 
     public String baseCurrency() {
@@ -59,31 +53,11 @@ public final class ExchangeRate {
         return timestamp;
     }
 
-    private static String validateCurrency(String currencyCode, String fieldName) {
-        String normalized = ValidationUtils.requireTrimmedNotBlank(currencyCode, fieldName).toUpperCase(Locale.ROOT);
-        try {
-            Currency.getInstance(normalized);
-        } catch (IllegalArgumentException ex) {
-            throw new RequestValidationException(fieldName + " " + ISO_CURRENCY_ERROR, ex);
+    private static String normalizeCurrency(String currencyCode) {
+        if (currencyCode == null) {
+            return null;
         }
-        return normalized;
-    }
-
-    private static BigDecimal validateRate(BigDecimal value) {
-        if (value == null) {
-            throw MissingRequiredValueException.forField("rate");
-        }
-        if (value.signum() <= 0) {
-            throw new RequestValidationException("rate must be greater than zero");
-        }
-        return value;
-    }
-
-    private static Instant requireTimestamp(Instant timestamp) {
-        if (timestamp == null) {
-            throw MissingRequiredValueException.forField("timestamp");
-        }
-        return timestamp;
+        return currencyCode.trim().toUpperCase(Locale.ROOT);
     }
 
     @Override

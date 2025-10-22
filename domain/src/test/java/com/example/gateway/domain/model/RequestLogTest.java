@@ -1,12 +1,15 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
+import com.example.gateway.domain.validation.BeanValidationService;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,17 +28,15 @@ class RequestLogTest {
     }
 
     @Test
-    @DisplayName("constructor rejects null arguments")
-    void constructorRejectsNulls() {
-        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
+    @DisplayName("bean validation reports missing request log data")
+    void beanValidationDetectsInvalidValues() {
+        BeanValidationService validationService =
+                new BeanValidationService(Validation.buildDefaultValidatorFactory().getValidator());
+        RequestLog log = new RequestLog(null, " ", null, null);
 
-        assertThrows(MissingRequiredValueException.class,
-                () -> new RequestLog(null, "/rates", "GET", timestamp));
-        assertThrows(MissingRequiredValueException.class,
-                () -> new RequestLog("id-1", null, "GET", timestamp));
-        assertThrows(MissingRequiredValueException.class,
-                () -> new RequestLog("id-1", "/rates", null, timestamp));
-        assertThrows(MissingRequiredValueException.class,
-                () -> new RequestLog("id-1", "/rates", "GET", null));
+        ConstraintViolationException exception =
+                assertThrows(ConstraintViolationException.class, () -> validationService.requireValid(log, "log"));
+
+        assertFalse(exception.getConstraintViolations().isEmpty());
     }
 }

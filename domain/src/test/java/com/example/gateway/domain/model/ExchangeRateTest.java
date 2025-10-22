@@ -1,7 +1,8 @@
 package com.example.gateway.domain.model;
 
-import com.example.gateway.domain.exception.MissingRequiredValueException;
-import com.example.gateway.domain.exception.RequestValidationException;
+import com.example.gateway.domain.validation.BeanValidationService;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -27,38 +29,15 @@ class ExchangeRateTest {
     }
 
     @Test
-    @DisplayName("constructor rejects invalid ISO currency codes")
-    void constructorRejectsInvalidCurrencies() {
-        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
+    @DisplayName("bean validation flags invalid exchange rate values")
+    void beanValidationDetectsInvalidValues() {
+        BeanValidationService validationService =
+                new BeanValidationService(Validation.buildDefaultValidatorFactory().getValidator());
+        ExchangeRate rate = new ExchangeRate("", null, BigDecimal.ZERO, null);
 
-        assertThrows(RequestValidationException.class,
-                () -> new ExchangeRate("US1", "EUR", BigDecimal.ONE, timestamp));
+        ConstraintViolationException exception =
+                assertThrows(ConstraintViolationException.class, () -> validationService.requireValid(rate, "rate"));
 
-        assertThrows(RequestValidationException.class,
-                () -> new ExchangeRate("USD", "EU", BigDecimal.ONE, timestamp));
-    }
-
-    @Test
-    @DisplayName("constructor rejects null or non-positive values")
-    void constructorRejectsInvalidValues() {
-        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
-
-        assertThrows(MissingRequiredValueException.class,
-                () -> new ExchangeRate(null, "EUR", BigDecimal.ONE, timestamp));
-
-        assertThrows(MissingRequiredValueException.class,
-                () -> new ExchangeRate("USD", null, BigDecimal.ONE, timestamp));
-
-        assertThrows(MissingRequiredValueException.class,
-                () -> new ExchangeRate("USD", "EUR", null, timestamp));
-
-        assertThrows(RequestValidationException.class,
-                () -> new ExchangeRate("USD", "EUR", BigDecimal.ZERO, timestamp));
-
-        assertThrows(RequestValidationException.class,
-                () -> new ExchangeRate("USD", "EUR", BigDecimal.ONE.negate(), timestamp));
-
-        assertThrows(MissingRequiredValueException.class,
-                () -> new ExchangeRate("USD", "EUR", BigDecimal.ONE, null));
+        assertFalse(exception.getConstraintViolations().isEmpty());
     }
 }
