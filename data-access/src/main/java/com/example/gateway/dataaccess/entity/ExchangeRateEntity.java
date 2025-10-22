@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "exchange_rates",
         indexes = {
-                @Index(name = "idx_exchange_rates_recorded_at", columnList = "recorded_at"),
+                @Index(name = "idx_exchange_rates_timestamp", columnList = "recorded_at"),
                 @Index(name = "idx_exchange_rates_currencies", columnList = "base_currency,target_currency")
         },
         uniqueConstraints = {
@@ -54,6 +54,6 @@ public class ExchangeRateEntity {
 
     @NotNull
     @Column(name = "recorded_at", nullable = false)
-    private Instant recordedAt;
+    private Instant timestamp;
 
 }

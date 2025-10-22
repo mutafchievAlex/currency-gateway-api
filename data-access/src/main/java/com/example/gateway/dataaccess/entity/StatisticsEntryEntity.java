@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "statistics_entries",
         indexes = {
                 @Index(name = "idx_statistics_metric", columnList = "metric"),
-                @Index(name = "idx_statistics_recorded_at", columnList = "recorded_at")
+                @Index(name = "idx_statistics_timestamp", columnList = "recorded_at")
         })
 public class StatisticsEntryEntity {
 
@@ -37,7 +37,7 @@ public class StatisticsEntryEntity {
 
     @NotBlank
     @Column(name = "metric", nullable = false)
-    private String metric;
+    private String metricName;
 
     @NotNull
     @Column(name = "value", nullable = false, precision = 19, scale = 6)
@@ -45,6 +45,6 @@ public class StatisticsEntryEntity {
 
     @NotNull
     @Column(name = "recorded_at", nullable = false)
-    private Instant recordedAt;
+    private Instant timestamp;
 
 }

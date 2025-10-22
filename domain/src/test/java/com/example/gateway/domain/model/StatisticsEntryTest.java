@@ -16,23 +16,23 @@ class StatisticsEntryTest {
     @Test
     @DisplayName("constructor stores metric details")
     void constructorStoresValues() {
-        Instant recordedAt = Instant.parse("2024-01-01T00:00:00Z");
-        StatisticsEntry entry = new StatisticsEntry("request.count", new BigDecimal("10"), recordedAt);
+        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
+        StatisticsEntry entry = new StatisticsEntry("request.count", new BigDecimal("10"), timestamp);
 
         assertEquals("request.count", entry.metricName());
         assertEquals(new BigDecimal("10"), entry.value());
-        assertSame(recordedAt, entry.recordedAt());
+        assertSame(timestamp, entry.timestamp());
     }
 
     @Test
     @DisplayName("constructor rejects null arguments")
     void constructorRejectsNulls() {
-        Instant recordedAt = Instant.parse("2024-01-01T00:00:00Z");
+        Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
 
         assertThrows(MissingRequiredValueException.class,
-                () -> new StatisticsEntry(null, BigDecimal.ONE, recordedAt));
+                () -> new StatisticsEntry(null, BigDecimal.ONE, timestamp));
         assertThrows(MissingRequiredValueException.class,
-                () -> new StatisticsEntry("request.count", null, recordedAt));
+                () -> new StatisticsEntry("request.count", null, timestamp));
         assertThrows(MissingRequiredValueException.class,
                 () -> new StatisticsEntry("request.count", BigDecimal.ONE, null));
     }

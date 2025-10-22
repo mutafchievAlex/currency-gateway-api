@@ -62,9 +62,9 @@ class StatisticsPublisherTest {
                 captor.capture());
 
         StatisticsPublisher.StatisticsEvent event = captor.getValue();
-        assertThat(event.metric()).isEqualTo("request.count");
+        assertThat(event.metricName()).isEqualTo("request.count");
         assertThat(event.value()).isEqualTo(new BigDecimal("12.34"));
-        assertThat(event.recordedAt()).isEqualTo(Instant.parse("2024-04-01T10:15:30Z"));
+        assertThat(event.timestamp()).isEqualTo(Instant.parse("2024-04-01T10:15:30Z"));
     }
 
     @Test

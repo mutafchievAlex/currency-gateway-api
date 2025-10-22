@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface StatisticsRepository extends JpaRepository<StatisticsEntryEntity, Long> {
 
-    List<StatisticsEntryEntity> findByMetricNameAndRecordedAtBetweenOrderByRecordedAtAsc(String metricName,
-                                                                                         Instant start,
-                                                                                         Instant end);
+    List<StatisticsEntryEntity> findByMetricNameAndTimestampBetweenOrderByTimestampAsc(String metricName,
+                                                                                       Instant start,
+                                                                                       Instant end);
 }

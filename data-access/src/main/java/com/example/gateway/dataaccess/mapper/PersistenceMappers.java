@@ -1,30 +1,25 @@
 package com.example.gateway.dataaccess.mapper;
 
-import com.example.gateway.domain.model.ExchangeRate;
-import com.example.gateway.domain.model.RequestLog;
-import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.dataaccess.entity.ExchangeRateEntity;
 import com.example.gateway.dataaccess.entity.RequestLogEntity;
 import com.example.gateway.dataaccess.entity.StatisticsEntryEntity;
+import com.example.gateway.domain.model.ExchangeRate;
+import com.example.gateway.domain.model.RequestLog;
+import com.example.gateway.domain.model.StatisticsEntry;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface PersistenceMappers {
 
-    @Mapping(target = "recordedAt", source = "timestamp")
     ExchangeRateEntity toEntity(ExchangeRate rate);
 
-    @Mapping(target = "timestamp", source = "recordedAt")
     ExchangeRate toDomain(ExchangeRateEntity entity);
 
     RequestLogEntity toEntity(RequestLog log);
 
     RequestLog toDomain(RequestLogEntity entity);
 
-    @Mapping(target = "metric", source = "metricName")
     StatisticsEntryEntity toEntity(StatisticsEntry entry);
 
-    @Mapping(target = "metricName", source = "metric")
     StatisticsEntry toDomain(StatisticsEntryEntity entity);
 }

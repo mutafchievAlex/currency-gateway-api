@@ -40,20 +40,20 @@ public class StatisticsPublisher {
         return "statistics." + metricName;
     }
 
-    public record StatisticsEvent(String metric, BigDecimal value, Instant recordedAt) {
+    public record StatisticsEvent(String metricName, BigDecimal value, Instant timestamp) {
 
         private StatisticsEvent {
-            metric = ValidationUtils.requireTrimmedNotBlank(metric, "metric");
+            metricName = ValidationUtils.requireTrimmedNotBlank(metricName, "metricName");
             if (value == null) {
                 throw MissingRequiredValueException.forField("value");
             }
-            if (recordedAt == null) {
-                throw MissingRequiredValueException.forField("recordedAt");
+            if (timestamp == null) {
+                throw MissingRequiredValueException.forField("timestamp");
             }
         }
 
         public static StatisticsEvent from(StatisticsEntry entry) {
-            return new StatisticsEvent(entry.metricName(), entry.value(), entry.recordedAt());
+            return new StatisticsEvent(entry.metricName(), entry.value(), entry.timestamp());
         }
     }
 }

@@ -165,15 +165,15 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
 
     @Test
     void shouldPersistStatisticsEntries() {
-        Instant recordedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        StatisticsEntry entry = new StatisticsEntry("request.count", new BigDecimal("42.50"), recordedAt);
+        Instant timestamp = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        StatisticsEntry entry = new StatisticsEntry("request.count", new BigDecimal("42.50"), timestamp);
 
         statisticsCollectorService.record(entry);
 
         List<StatisticsEntry> entries = statisticsCollectorService.retrieve(
                 "request.count",
-                recordedAt.minusSeconds(5),
-                recordedAt.plusSeconds(5)
+                timestamp.minusSeconds(5),
+                timestamp.plusSeconds(5)
         );
 
         assertThat(entries)
@@ -181,7 +181,7 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
                 .satisfies(stored -> {
                     assertThat(stored.metricName()).isEqualTo("request.count");
                     assertThat(stored.value()).isEqualByComparingTo("42.50");
-                    assertThat(stored.recordedAt()).isEqualTo(recordedAt);
+                    assertThat(stored.timestamp()).isEqualTo(timestamp);
                 });
     }
 
@@ -216,7 +216,7 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
 
         assertThat(received).isInstanceOf(StatisticsPublisher.StatisticsEvent.class);
         StatisticsPublisher.StatisticsEvent event = (StatisticsPublisher.StatisticsEvent) received;
-        assertThat(event.metric()).isEqualTo("request.total");
+        assertThat(event.metricName()).isEqualTo("request.total");
         assertThat(event.value()).isEqualByComparingTo("12.34");
     }
 }

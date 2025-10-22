@@ -34,11 +34,11 @@ class ExchangeRateRepositoryTest {
         repository.save(MAPPER.toEntity(new ExchangeRate("USD", "GBP", new BigDecimal("0.8000"), now)));
 
         ExchangeRateEntity latest = repository
-                .findFirstByBaseCurrencyAndTargetCurrencyOrderByRecordedAtDesc("USD", "EUR")
+                .findFirstByBaseCurrencyAndTargetCurrencyOrderByTimestampDesc("USD", "EUR")
                 .orElseThrow();
 
         assertThat(latest.getRate()).isEqualByComparingTo("0.9100");
-        assertThat(latest.getRecordedAt()).isEqualTo(now);
+        assertThat(latest.getTimestamp()).isEqualTo(now);
     }
 
     @Test
@@ -52,12 +52,12 @@ class ExchangeRateRepositoryTest {
         repository.save(MAPPER.toEntity(newer));
 
         List<ExchangeRateEntity> results = repository
-                .findByBaseCurrencyAndTargetCurrencyAndRecordedAtBetweenOrderByRecordedAtAsc(
+                .findByBaseCurrencyAndTargetCurrencyAndTimestampBetweenOrderByTimestampAsc(
                         "USD", "CAD", now.minusSeconds(180), now.plusSeconds(1));
 
         assertThat(results).hasSize(3);
-        assertThat(results.get(0).getRecordedAt()).isEqualTo(older.timestamp());
-        assertThat(results.get(2).getRecordedAt()).isEqualTo(newer.timestamp());
+        assertThat(results.get(0).getTimestamp()).isEqualTo(older.timestamp());
+        assertThat(results.get(2).getTimestamp()).isEqualTo(newer.timestamp());
     }
 
     @Test
