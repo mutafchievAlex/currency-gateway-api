@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,12 +47,20 @@ class DefaultExchangeRateServiceTest {
     void setUp() {
         timestamp = Instant.parse("2024-01-01T00:00:00Z");
         rate = new ExchangeRate("USD", "EUR", new BigDecimal("0.9100"), timestamp);
-        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(validationService.requirePresent(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void mockRequireValidRate() {
+        when(validationService.requireValid(rate, "rate")).thenReturn(rate);
+    }
+
+    private void mockRequirePresent(Instant start, Instant end) {
+        when(validationService.requirePresent(start, "start")).thenReturn(start);
+        when(validationService.requirePresent(end, "end")).thenReturn(end);
     }
 
     @Test
     void savesRateWhenEntryIsMissing() {
+        mockRequireValidRate();
         when(repository.findByPairAndTimestamp(rate.baseCurrency(), rate.targetCurrency(), rate.timestamp()))
                 .thenReturn(Optional.empty());
         when(repository.save(rate)).thenReturn(rate);
@@ -67,6 +73,7 @@ class DefaultExchangeRateServiceTest {
 
     @Test
     void skipsPersistenceWhenDuplicateExists() {
+        mockRequireValidRate();
         when(repository.findByPairAndTimestamp(rate.baseCurrency(), rate.targetCurrency(), rate.timestamp()))
                 .thenReturn(Optional.of(rate));
 
@@ -89,6 +96,7 @@ class DefaultExchangeRateServiceTest {
     void findsHistoryWithinRange() {
         Instant start = timestamp.minus(1, ChronoUnit.DAYS);
         Instant end = timestamp.plus(1, ChronoUnit.DAYS);
+        mockRequirePresent(start, end);
         when(repository.findWithinRange("USD", "EUR", start, end)).thenReturn(List.of(rate));
 
         List<ExchangeRate> history = service.findHistory("usd", "eur", start, end);
@@ -123,6 +131,7 @@ class DefaultExchangeRateServiceTest {
     void findHistoryRejectsInvalidRange() {
         Instant start = timestamp.plus(1, ChronoUnit.DAYS);
         Instant end = timestamp;
+        mockRequirePresent(start, end);
 
         assertThrows(InvalidExchangeRateQueryException.class, () -> service.findHistory("usd", "eur", start, end));
         verify(repository, never()).findWithinRange(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
