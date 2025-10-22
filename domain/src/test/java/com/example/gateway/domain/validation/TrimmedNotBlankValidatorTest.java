@@ -65,7 +65,7 @@ class TrimmedNotBlankValidatorTest {
     void shouldWorkAlongsideOtherConstraints() {
         record Sample(@TrimmedNotBlank @NotNull String value) { }
 
-        Set<?> violations = validator.validate(new Sample(null));
+        Set<?> violations = validator.validate(new Sample("   "));
         assertEquals(1, violations.size());
     }
 }

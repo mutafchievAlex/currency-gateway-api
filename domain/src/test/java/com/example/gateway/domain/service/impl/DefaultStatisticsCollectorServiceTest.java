@@ -15,8 +15,6 @@ import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,12 +35,20 @@ class DefaultStatisticsCollectorServiceTest {
     @BeforeEach
     void setUp() {
         entry = new StatisticsEntry("requests", new BigDecimal("42"), Instant.parse("2024-03-15T10:15:30Z"));
-        when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(validationService.requirePresent(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void mockRequireValidEntry() {
+        when(validationService.requireValid(entry, "entry")).thenReturn(entry);
+    }
+
+    private void mockRequirePresent(Instant start, Instant end) {
+        when(validationService.requirePresent(start, "start")).thenReturn(start);
+        when(validationService.requirePresent(end, "end")).thenReturn(end);
     }
 
     @Test
     void persistsStatisticsEntry() {
+        mockRequireValidEntry();
         when(repository.save(entry)).thenReturn(entry);
 
         StatisticsEntry persisted = service.record(entry);
@@ -56,6 +62,7 @@ class DefaultStatisticsCollectorServiceTest {
         Instant start = Instant.parse("2024-03-15T10:00:00Z");
         Instant end = Instant.parse("2024-03-15T11:00:00Z");
         List<StatisticsEntry> expected = List.of(entry);
+        mockRequirePresent(start, end);
         when(repository.findEntriesWithin("requests", start, end)).thenReturn(expected);
 
         List<StatisticsEntry> actual = service.retrieve("requests", start, end);
