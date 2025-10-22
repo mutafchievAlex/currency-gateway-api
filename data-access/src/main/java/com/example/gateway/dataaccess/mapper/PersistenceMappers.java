@@ -22,4 +22,24 @@ public interface PersistenceMappers {
     StatisticsEntryEntity toEntity(StatisticsEntry entry);
 
     StatisticsEntry toDomain(StatisticsEntryEntity entity);
+
+    @Named("exchangeRateTimestamp")
+    default Instant extractTimestamp(ExchangeRate rate) {
+        return rate == null ? null : rate.timestamp();
+    }
+
+    @Named("exchangeRateEntityRecordedAt")
+    default Instant extractRecordedAt(ExchangeRateEntity entity) {
+        return entity == null ? null : entity.getRecordedAt();
+    }
+
+    @Named("statisticsEntryRecordedAt")
+    default Instant extractStatisticsRecordedAt(StatisticsEntry entry) {
+        return entry == null ? null : entry.recordedAt();
+    }
+
+    @Named("statisticsEntryEntityRecordedAt")
+    default Instant extractEntityRecordedAt(StatisticsEntryEntity entity) {
+        return entity == null ? null : entity.getRecordedAt();
+    }
 }
