@@ -2,24 +2,27 @@ package com.example.gateway.api.controller.xml;
 
 import com.example.gateway.api.mapper.xml.XmlApiMapper;
 import com.example.gateway.api.support.ExchangeRateTestFixtures;
+import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
+import com.example.gateway.api.xml.generated.model.ExchangeRateResponse;
 import com.example.gateway.domain.exception.DuplicateRequestException;
-import com.example.gateway.domain.exception.MissingRequiredValueException;
 import com.example.gateway.domain.exception.ExchangeRateNotFoundException;
 import com.example.gateway.domain.exception.InvalidExchangeRateQueryException;
+import com.example.gateway.domain.exception.MissingRequiredValueException;
 import com.example.gateway.domain.model.ExchangeRate;
 import com.example.gateway.domain.service.ExchangeRateQueryService;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -27,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @WebMvcTest(XmlExchangeRateController.class)
-@Import(XmlExchangeRateControllerTest.MapperConfig.class)
 class XmlExchangeRateControllerTest {
 
     @Autowired
@@ -36,11 +38,20 @@ class XmlExchangeRateControllerTest {
     @MockBean
     private ExchangeRateQueryService exchangeRateQueryService;
 
+    @MockBean
+    private XmlApiMapper xmlApiMapper;
+
     @Test
     void returnsCurrentRateAsXml() throws Exception {
         ExchangeRate rate = ExchangeRateTestFixtures.rate().build();
+        ExchangeRateResponse response = new ExchangeRateResponse()
+                .baseCurrency("USD")
+                .targetCurrency("EUR")
+                .rate("0.9200")
+                .timestamp(OffsetDateTime.ofInstant(ExchangeRateTestFixtures.TIMESTAMP, ZoneOffset.UTC));
         when(exchangeRateQueryService.getCurrentRate("req-123", "/api/exchange-rates/current", "usd", "eur"))
                 .thenReturn(rate);
+        when(xmlApiMapper.toExchangeRateResponse(rate)).thenReturn(response);
 
         mockMvc.perform(get("/api/exchange-rates/current")
                         .queryParam("requestId", "req-123")
@@ -103,9 +114,22 @@ class XmlExchangeRateControllerTest {
     @Test
     void returnsHistoryAsXml() throws Exception {
         ExchangeRateTestFixtures.HistoryScenario scenario = ExchangeRateTestFixtures.usdToJpyHistoryScenario();
+        ExchangeRateResponse firstRate = new ExchangeRateResponse()
+                .baseCurrency("USD")
+                .targetCurrency("JPY")
+                .rate("110.00")
+                .timestamp(OffsetDateTime.ofInstant(scenario.start().plus(1, java.time.temporal.ChronoUnit.HOURS), ZoneOffset.UTC));
+        ExchangeRateResponse secondRate = new ExchangeRateResponse()
+                .baseCurrency("USD")
+                .targetCurrency("JPY")
+                .rate("111.00")
+                .timestamp(OffsetDateTime.ofInstant(scenario.end().minus(1, java.time.temporal.ChronoUnit.HOURS), ZoneOffset.UTC));
+        ExchangeRateHistoryResponse historyResponse = new ExchangeRateHistoryResponse()
+                .rates(List.of(firstRate, secondRate));
         when(exchangeRateQueryService.getHistory("req-456", "/api/exchange-rates/history", "usd", "jpy",
                 scenario.start().atOffset(java.time.ZoneOffset.UTC),
                 scenario.end().atOffset(java.time.ZoneOffset.UTC))).thenReturn(scenario.rates());
+        when(xmlApiMapper.toHistoryResponse(anyList())).thenReturn(historyResponse);
 
         mockMvc.perform(get("/api/exchange-rates/history")
                         .queryParam("requestId", "req-456")
@@ -136,14 +160,5 @@ class XmlExchangeRateControllerTest {
                         .accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isBadRequest())
                 .andExpect(xpath("/error/code").string(String.valueOf(HttpStatus.BAD_REQUEST.value())));
-    }
-
-    @TestConfiguration
-    static class MapperConfig {
-
-        @Bean
-        XmlApiMapper xmlApiMapper() {
-            return Mappers.getMapper(XmlApiMapper.class);
-        }
     }
 }
