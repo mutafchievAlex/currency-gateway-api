@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,11 +17,14 @@
     <name>Currency Gateway :: API Controller</name>
 
     <dependencies>
+        <!-- Internal modules -->
         <dependency>
             <groupId>com.example.gateway</groupId>
             <artifactId>domain</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Spring Boot + validation -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -28,14 +33,31 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- XML + JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-xml</artifactId>
         </dependency>
+
+        <!-- MapStruct -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
         </dependency>
+
+        <!-- Swagger / OpenAPI UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+        <!-- Tests -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -45,55 +67,95 @@
 
     <build>
         <plugins>
+
+            <!-- ✅ OpenAPI Generator -->
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>6.2.1</version>
                 <executions>
+
+                    <!-- JSON API generation -->
                     <execution>
                         <id>generate-json-api</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/openapi/exchange-rate-json-api.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources/openapi/json</output>
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <modelPackage>com.example.gateway.api.json.generated.model</modelPackage>
                             <apiPackage>com.example.gateway.api.json.generated.api</apiPackage>
-                            <interfaceOnly>true</interfaceOnly>
-                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipOverwrite>false</skipOverwrite>
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <generateSupportingFiles>true</generateSupportingFiles>
+                                <generateApiTests>true</generateApiTests>
+                                <generateApiDocumentation>true</generateApiDocumentation>
+                                <generateModelTests>true</generateModelTests>
+                                <generateModelDocumentation>true</generateModelDocumentation>
+                                <useTags>true</useTags>
+                                <groupByTags>true</groupByTags>
+                                <apiNamePrefix>JsonExchangeRates</apiNamePrefix>
+                                <apiNameSuffix>Controller</apiNameSuffix>
+                                <useExamples>true</useExamples>
                             </configOptions>
+
                         </configuration>
                     </execution>
+
+                    <!-- XML API generation -->
                     <execution>
                         <id>generate-xml-api</id>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/openapi/exchange-rate-xml-api.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources/openapi/xml</output>
                             <generatorName>spring</generatorName>
                             <library>spring-boot</library>
                             <modelPackage>com.example.gateway.api.xml.generated.model</modelPackage>
                             <apiPackage>com.example.gateway.api.xml.generated.api</apiPackage>
-                            <interfaceOnly>true</interfaceOnly>
-                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateSupportingFiles>true</generateSupportingFiles>
+                            <skipOverwrite>false</skipOverwrite>
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <dateLibrary>java8</dateLibrary>
+                                <interfaceOnly>true</interfaceOnly>
+                                <generateSupportingFiles>true</generateSupportingFiles>
+                                <generateApiTests>true</generateApiTests>
+                                <generateApiDocumentation>true</generateApiDocumentation>
+                                <generateModelTests>true</generateModelTests>
+                                <generateModelDocumentation>true</generateModelDocumentation>
+                                <useTags>true</useTags>
+                                <groupByTags>true</groupByTags>
+                                <apiNamePrefix>JsonExchangeRates</apiNamePrefix>
+                                <apiNameSuffix>Controller</apiNameSuffix>
+                                <useExamples>true</useExamples>
                             </configOptions>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
@@ -102,9 +164,12 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+
+            <!-- ✅ Add generated OpenAPI sources to project -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>add-openapi-sources</id>
@@ -114,12 +179,14 @@
                         </goals>
                         <configuration>
                             <sources>
-                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                                <source>${project.build.directory}/generated-sources/openapi/json/src/main/java</source>
+                                <source>${project.build.directory}/generated-sources/openapi/xml/src/main/java</source>
                             </sources>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>

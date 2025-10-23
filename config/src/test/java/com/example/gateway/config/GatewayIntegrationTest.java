@@ -83,8 +83,8 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
     @Test
     void shouldReturnLatestRateThroughJsonEndpoint() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.90"), now.minusSeconds(60)));
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.95"), now));
+        exchangeRateRepository.save(new ExchangeRateEntity(1L,"USD", "EUR", new BigDecimal("0.90"), now.minusSeconds(60)));
+        exchangeRateRepository.save(new ExchangeRateEntity(2L,"USD", "EUR", new BigDecimal("0.95"), now));
 
         String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
                 .queryParam("requestId", "json-req-1")
@@ -110,9 +110,9 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         Instant second = first.plusSeconds(30);
         Instant third = first.plusSeconds(60);
 
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.91"), first));
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.92"), second));
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "EUR", new BigDecimal("0.93"), third));
+        exchangeRateRepository.save(new ExchangeRateEntity(3L,"USD", "EUR", new BigDecimal("0.91"), first));
+        exchangeRateRepository.save(new ExchangeRateEntity(4L,"USD", "EUR", new BigDecimal("0.92"), second));
+        exchangeRateRepository.save(new ExchangeRateEntity(5L,"USD", "EUR", new BigDecimal("0.93"), third));
 
         String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/history")
                 .queryParam("requestId", "xml-req-1")
@@ -146,7 +146,7 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
     @Test
     void shouldRejectDuplicateRequestIdsAcrossEndpoints() {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        exchangeRateRepository.save(new ExchangeRateEntity("USD", "GBP", new BigDecimal("0.80"), now));
+        exchangeRateRepository.save(new ExchangeRateEntity(1L,"USD", "GBP", new BigDecimal("0.80"), now));
 
         String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
                 .queryParam("requestId", "dup-req-1")
@@ -179,9 +179,9 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         assertThat(entries)
                 .singleElement()
                 .satisfies(stored -> {
-                    assertThat(stored.metricName()).isEqualTo("request.count");
-                    assertThat(stored.value()).isEqualByComparingTo("42.50");
-                    assertThat(stored.timestamp()).isEqualTo(timestamp);
+                    assertThat(stored.getMetricName()).isEqualTo("request.count");
+                    assertThat(stored.getValue()).isEqualByComparingTo("42.50");
+                    assertThat(stored.getTimestamp()).isEqualTo(timestamp);
                 });
     }
 

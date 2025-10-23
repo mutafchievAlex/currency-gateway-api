@@ -2,14 +2,17 @@ package com.example.gateway.api.mapper.xml;
 
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateResponse;
-import com.example.gateway.api.mapper.OffsetDateTimeMapper;
 import com.example.gateway.domain.model.ExchangeRate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = OffsetDateTimeMapper.class)
+@Mapper(componentModel = "spring")
 public interface XmlApiMapper {
 
     @Mapping(target = "timestamp", source = "timestamp", qualifiedByName = "instantToOffsetDateTime")
@@ -21,5 +24,13 @@ public interface XmlApiMapper {
         ExchangeRateHistoryResponse response = new ExchangeRateHistoryResponse();
         response.setRates(toExchangeRateResponses(rates));
         return response;
+    }
+
+    @Named("instantToOffsetDateTime")
+    default OffsetDateTime instantToOffsetDateTime(Instant timestamp) {
+        if (timestamp == null) {
+            return null;
+        }
+        return timestamp.atOffset(ZoneOffset.UTC);
     }
 }

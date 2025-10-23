@@ -65,10 +65,10 @@ class DefaultRatesCollectorServiceTest {
         verify(exchangeRateService, times(2)).saveIfAbsent(captor.capture());
 
         Set<String> targets = captor.getAllValues().stream()
-                .map(ExchangeRate::targetCurrency)
+                .map(ExchangeRate::getTargetCurrency)
                 .collect(Collectors.toSet());
         assertEquals(Set.of("EUR", "GBP"), targets);
-        assertTrue(captor.getAllValues().stream().allMatch(rate -> rate.baseCurrency().equals("USD")));
-        assertTrue(captor.getAllValues().stream().allMatch(rate -> rate.timestamp().equals(timestamp)));
+        assertTrue(captor.getAllValues().stream().allMatch(rate -> rate.getBaseCurrency().equals("USD")));
+        assertTrue(captor.getAllValues().stream().allMatch(rate -> rate.getTimestamp().equals(timestamp)));
     }
 }

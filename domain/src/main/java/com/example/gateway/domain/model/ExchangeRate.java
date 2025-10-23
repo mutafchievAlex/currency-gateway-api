@@ -15,49 +15,55 @@ import java.util.Objects;
 public final class ExchangeRate {
 
     @NotBlank
-    private final String baseCurrency;
+    private String baseCurrency;
 
     @NotBlank
-    private final String targetCurrency;
+    private String targetCurrency;
 
     @NotNull
     @Positive
-    private final BigDecimal rate;
+    private BigDecimal rate;
 
     @NotNull
-    private final Instant timestamp;
+    private Instant timestamp;
 
-    public ExchangeRate(String baseCurrency,
-                        String targetCurrency,
-                        BigDecimal rate,
-                        Instant timestamp) {
-        this.baseCurrency = normalizeCurrency(baseCurrency);
-        this.targetCurrency = normalizeCurrency(targetCurrency);
+    public ExchangeRate(String baseCurrency, String targetCurrency, BigDecimal rate, Instant timestamp){
+        this.baseCurrency = baseCurrency;
+        this.targetCurrency = targetCurrency;
         this.rate = rate;
         this.timestamp = timestamp;
     }
 
-    public String baseCurrency() {
+    public void setBaseCurrency(String baseCurrency) {
+        this.baseCurrency = baseCurrency;
+    }
+
+    public void setTargetCurrency(String targetCurrency) {
+        this.targetCurrency = targetCurrency;
+    }
+
+    public void setRate(BigDecimal rate) {
+        this.rate = rate;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getBaseCurrency() {
         return baseCurrency;
     }
 
-    public String targetCurrency() {
+    public String getTargetCurrency() {
         return targetCurrency;
     }
 
-    public BigDecimal rate() {
-        return rate;
-    }
-
-    public Instant timestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    private static String normalizeCurrency(String currencyCode) {
-        if (currencyCode == null) {
-            return null;
-        }
-        return currencyCode.trim().toUpperCase(Locale.ROOT);
+    public BigDecimal getRate() {
+        return rate;
     }
 
     @Override

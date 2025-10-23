@@ -5,6 +5,7 @@ import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.domain.repository.StatisticsRepositoryPort;
 import com.example.gateway.domain.service.StatisticsCollectorService;
 import com.example.gateway.domain.validation.BeanValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -16,6 +17,7 @@ public class DefaultStatisticsCollectorService implements StatisticsCollectorSer
     private final StatisticsRepositoryPort repository;
     private final BeanValidationService validationService;
 
+    @Autowired
     public DefaultStatisticsCollectorService(StatisticsRepositoryPort repository, BeanValidationService validationService) {
         this.repository = repository;
         this.validationService = validationService;

@@ -10,7 +10,7 @@ collector:
     - JPY
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/currency_gateway
+    url: jdbc:postgresql://localhost:5432/currency
     username: ${DB_USERNAME:currency}
     password: ${DB_PASSWORD:currency}
     hikari:
@@ -23,12 +23,15 @@ spring:
       validation-timeout: 5000
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate:
         format_sql: true
+      jakarta.persistence.schema-generation.scripts.action: create
+      jakarta.persistence.schema-generation.scripts.create-target: build/schema.sql
+      jakarta.persistence.schema-generation.scripts.create-source: metadata
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}

@@ -44,7 +44,7 @@ class DefaultRequestLogServiceTest {
 
     @Test
     void recordsNewRequestWhenMissing() {
-        when(repository.findByRequestId(log.requestId())).thenReturn(Optional.empty());
+        when(repository.findByRequestId(log.getRequestId())).thenReturn(Optional.empty());
         when(repository.save(log)).thenReturn(log);
 
         RequestLog recorded = service.record(log);
@@ -55,7 +55,7 @@ class DefaultRequestLogServiceTest {
 
     @Test
     void throwsExceptionWhenDuplicateRequestDetected() {
-        when(repository.findByRequestId(log.requestId())).thenReturn(Optional.of(log));
+        when(repository.findByRequestId(log.getRequestId())).thenReturn(Optional.of(log));
 
         assertThrows(DuplicateRequestException.class, () -> service.record(log));
         verify(repository, never()).save(log);

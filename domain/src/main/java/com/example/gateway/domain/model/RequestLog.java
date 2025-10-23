@@ -12,16 +12,16 @@ import java.util.Objects;
 public final class RequestLog {
 
     @NotBlank
-    private final String requestId;
+    private String requestId;
 
     @NotBlank
-    private final String endpoint;
+    private String endpoint;
 
     @NotBlank
-    private final String httpMethod;
+    private String httpMethod;
 
     @NotNull
-    private final Instant timestamp;
+    private Instant timestamp;
 
     public RequestLog(String requestId,
                       String endpoint,
@@ -33,20 +33,36 @@ public final class RequestLog {
         this.timestamp = timestamp;
     }
 
-    public String requestId() {
+    public String getRequestId() {
         return requestId;
     }
 
-    public String endpoint() {
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    public String getEndpoint() {
         return endpoint;
     }
 
-    public String httpMethod() {
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public Instant getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getHttpMethod() {
         return httpMethod;
     }
 
-    public Instant timestamp() {
-        return timestamp;
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
     }
 
     private static String normalize(String value) {

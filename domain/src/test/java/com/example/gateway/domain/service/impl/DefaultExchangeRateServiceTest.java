@@ -61,7 +61,7 @@ class DefaultExchangeRateServiceTest {
     @Test
     void savesRateWhenEntryIsMissing() {
         mockRequireValidRate();
-        when(repository.findByPairAndTimestamp(rate.baseCurrency(), rate.targetCurrency(), rate.timestamp()))
+        when(repository.findByPairAndTimestamp(rate.getBaseCurrency(), rate.getTargetCurrency(), rate.getTimestamp()))
                 .thenReturn(Optional.empty());
         when(repository.save(rate)).thenReturn(rate);
 
@@ -74,7 +74,7 @@ class DefaultExchangeRateServiceTest {
     @Test
     void skipsPersistenceWhenDuplicateExists() {
         mockRequireValidRate();
-        when(repository.findByPairAndTimestamp(rate.baseCurrency(), rate.targetCurrency(), rate.timestamp()))
+        when(repository.findByPairAndTimestamp(rate.getBaseCurrency(), rate.getTargetCurrency(), rate.getTimestamp()))
                 .thenReturn(Optional.of(rate));
 
         boolean persisted = service.saveIfAbsent(rate);
@@ -89,7 +89,7 @@ class DefaultExchangeRateServiceTest {
 
         ExchangeRate latest = service.getLatest("usd", "eur");
 
-        assertEquals(timestamp, latest.timestamp());
+        assertEquals(timestamp, latest.getTimestamp());
     }
 
     @Test
@@ -102,7 +102,7 @@ class DefaultExchangeRateServiceTest {
         List<ExchangeRate> history = service.findHistory("usd", "eur", start, end);
 
         assertFalse(history.isEmpty());
-        assertTrue(history.stream().anyMatch(entry -> entry.timestamp().equals(timestamp)));
+        assertTrue(history.stream().anyMatch(entry -> entry.getTimestamp().equals(timestamp)));
     }
 
     @Test

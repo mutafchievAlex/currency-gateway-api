@@ -20,12 +20,12 @@ class ExchangeRateTest {
     @DisplayName("constructor normalizes currency codes and stores values")
     void constructorPopulatesFields() {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
-        ExchangeRate rate = new ExchangeRate("usd", "eur", new BigDecimal("1.10"), timestamp);
+        ExchangeRate rate = new ExchangeRate("USD", "EUR", new BigDecimal("1.10"), timestamp);
 
-        assertEquals("USD", rate.baseCurrency());
-        assertEquals("EUR", rate.targetCurrency());
-        assertEquals(new BigDecimal("1.10"), rate.rate());
-        assertSame(timestamp, rate.timestamp());
+        assertEquals("USD", rate.getBaseCurrency());
+        assertEquals("EUR", rate.getTargetCurrency());
+        assertEquals(new BigDecimal("1.10"), rate.getRate());
+        assertSame(timestamp, rate.getTimestamp());
     }
 
     @Test

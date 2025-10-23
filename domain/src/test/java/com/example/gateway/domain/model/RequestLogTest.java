@@ -21,10 +21,10 @@ class RequestLogTest {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
         RequestLog log = new RequestLog("id-1", "/rates", "GET", timestamp);
 
-        assertEquals("id-1", log.requestId());
-        assertEquals("/rates", log.endpoint());
-        assertEquals("GET", log.httpMethod());
-        assertSame(timestamp, log.timestamp());
+        assertEquals("id-1", log.getRequestId());
+        assertEquals("/rates", log.getEndpoint());
+        assertEquals("GET", log.getHttpMethod());
+        assertSame(timestamp, log.getTimestamp());
     }
 
     @Test

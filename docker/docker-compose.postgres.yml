@@ -2,14 +2,11 @@ version: '3.8'
 
 services:
   postgres:
-    build:
-      context: ..
-      dockerfile: docker/postgres/Dockerfile
-    container_name: currency-gateway-postgres
+    image: library/postgres:14
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_DB: ${DB_NAME:-currency_gateway}
+      POSTGRES_DB: ${DB_NAME:-currency}
       POSTGRES_USER: ${DB_USERNAME:-currency}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-currency}
     healthcheck:
@@ -17,9 +14,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - "postgres-db"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
     driver: local
+
+networks:
+  postgres-db:
+    driver: bridge

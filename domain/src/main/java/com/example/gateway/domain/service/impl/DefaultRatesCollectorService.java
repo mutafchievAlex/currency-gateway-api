@@ -7,6 +7,7 @@ import com.example.gateway.domain.repository.RatesSnapshot;
 import com.example.gateway.domain.service.ExchangeRateService;
 import com.example.gateway.domain.service.RatesCollectorService;
 import com.example.gateway.domain.validation.BeanValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -26,12 +27,13 @@ public class DefaultRatesCollectorService implements RatesCollectorService {
     private final ExchangeRateService exchangeRateService;
     private final BeanValidationService validationService;
 
+    @Autowired
     public DefaultRatesCollectorService(ExternalRatesClient externalRatesClient,
                                         ExchangeRateService exchangeRateService,
                                         BeanValidationService validationService) {
         this.validationService = validationService;
-        this.externalRatesClient = validationService.requirePresent(externalRatesClient, "externalRatesClient");
-        this.exchangeRateService = validationService.requirePresent(exchangeRateService, "exchangeRateService");
+        this.externalRatesClient = externalRatesClient;
+        this.exchangeRateService = exchangeRateService;
     }
 
     @Override

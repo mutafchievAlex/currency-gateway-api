@@ -32,7 +32,7 @@ public class StatisticsPublisher {
     public void publish(StatisticsEntry entry) {
         StatisticsEntry candidate = validationService.requireValid(entry, "entry");
 
-        String routingKey = buildRoutingKey(candidate.metricName());
+        String routingKey = buildRoutingKey(candidate.getMetricName());
         rabbitTemplate.convertAndSend(statisticsExchange.getName(), routingKey, StatisticsEvent.from(candidate));
     }
 
@@ -42,7 +42,7 @@ public class StatisticsPublisher {
 
     public record StatisticsEvent(String metricName, BigDecimal value, Instant timestamp) {
 
-        private StatisticsEvent {
+        public StatisticsEvent {
             metricName = ValidationUtils.requireTrimmedNotBlank(metricName, "metricName");
             if (value == null) {
                 throw MissingRequiredValueException.forField("value");
@@ -53,7 +53,7 @@ public class StatisticsPublisher {
         }
 
         public static StatisticsEvent from(StatisticsEntry entry) {
-            return new StatisticsEvent(entry.metricName(), entry.value(), entry.timestamp());
+            return new StatisticsEvent(entry.getMetricName(), entry.getValue(), entry.getTimestamp());
         }
     }
 }

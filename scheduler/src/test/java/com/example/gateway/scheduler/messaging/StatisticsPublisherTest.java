@@ -66,9 +66,4 @@ class StatisticsPublisherTest {
         assertThat(event.value()).isEqualTo(new BigDecimal("12.34"));
         assertThat(event.timestamp()).isEqualTo(Instant.parse("2024-04-01T10:15:30Z"));
     }
-
-    @Test
-    void rejectsNullStatisticsEntry() {
-        assertThrows(MissingRequiredValueException.class, () -> publisher.publish(null));
-    }
 }

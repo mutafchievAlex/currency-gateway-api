@@ -13,39 +13,44 @@ import java.util.Objects;
 public final class StatisticsEntry {
 
     @NotBlank
-    private final String metricName;
+    private String metricName;
 
     @NotNull
-    private final BigDecimal value;
+    private BigDecimal value;
 
     @NotNull
-    private final Instant timestamp;
+    private Instant timestamp;
 
     public StatisticsEntry(String metricName,
                            BigDecimal value,
                            Instant timestamp) {
-        this.metricName = normalize(metricName);
+        this.metricName = metricName;
         this.value = value;
         this.timestamp = timestamp;
     }
 
-    public String metricName() {
+    public String getMetricName() {
         return metricName;
     }
 
-    public BigDecimal value() {
+    public void setMetricName(String metricName) {
+        this.metricName = metricName;
+    }
+
+    public BigDecimal getValue() {
         return value;
     }
 
-    public Instant timestamp() {
+    public void setValue(BigDecimal value) {
+        this.value = value;
+    }
+
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    private static String normalize(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.trim();
+    public void setTimestamp(Instant timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override

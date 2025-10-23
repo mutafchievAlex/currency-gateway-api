@@ -7,6 +7,7 @@ import com.example.gateway.domain.model.ExchangeRate;
 import com.example.gateway.domain.repository.ExchangeRateRepositoryPort;
 import com.example.gateway.domain.service.ExchangeRateService;
 import com.example.gateway.domain.validation.BeanValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,6 +22,7 @@ public class DefaultExchangeRateService implements ExchangeRateService {
     private final ExchangeRateRepositoryPort repository;
     private final BeanValidationService validationService;
 
+    @Autowired
     public DefaultExchangeRateService(ExchangeRateRepositoryPort repository, BeanValidationService validationService) {
         this.repository = repository;
         this.validationService = validationService;
@@ -29,7 +31,7 @@ public class DefaultExchangeRateService implements ExchangeRateService {
     @Override
     public boolean saveIfAbsent(ExchangeRate rate) {
         ExchangeRate candidate = validationService.requireValid(rate, "rate");
-        return repository.findByPairAndTimestamp(candidate.baseCurrency(), candidate.targetCurrency(), candidate.timestamp())
+        return repository.findByPairAndTimestamp(candidate.getBaseCurrency(), candidate.getTargetCurrency(), candidate.getTimestamp())
                 .map(existing -> false)
                 .orElseGet(() -> {
                     repository.save(candidate);

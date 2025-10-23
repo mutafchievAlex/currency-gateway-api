@@ -22,9 +22,9 @@ class StatisticsEntryTest {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
         StatisticsEntry entry = new StatisticsEntry("request.count", new BigDecimal("10"), timestamp);
 
-        assertEquals("request.count", entry.metricName());
-        assertEquals(new BigDecimal("10"), entry.value());
-        assertSame(timestamp, entry.timestamp());
+        assertEquals("request.count", entry.getMetricName());
+        assertEquals(new BigDecimal("10"), entry.getValue());
+        assertSame(timestamp, entry.getTimestamp());
     }
 
     @Test

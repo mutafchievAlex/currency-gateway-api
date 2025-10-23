@@ -8,6 +8,7 @@ import com.example.gateway.domain.service.ExchangeRateQueryService;
 import com.example.gateway.domain.service.ExchangeRateService;
 import com.example.gateway.domain.service.RequestLogService;
 import com.example.gateway.domain.validation.BeanValidationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -28,20 +29,14 @@ public class DefaultExchangeRateQueryService implements ExchangeRateQueryService
     private final BeanValidationService validationService;
     private final Supplier<Instant> timestampSupplier;
 
+    @Autowired
     public DefaultExchangeRateQueryService(ExchangeRateService exchangeRateService,
                                            RequestLogService requestLogService,
                                            BeanValidationService validationService) {
-        this(exchangeRateService, requestLogService, validationService, Instant::now);
-    }
-
-    DefaultExchangeRateQueryService(ExchangeRateService exchangeRateService,
-                                    RequestLogService requestLogService,
-                                    BeanValidationService validationService,
-                                    Supplier<Instant> timestampSupplier) {
-        this.exchangeRateService = validationService.requirePresent(exchangeRateService, "exchangeRateService");
-        this.requestLogService = validationService.requirePresent(requestLogService, "requestLogService");
+        this.exchangeRateService = exchangeRateService;
+        this.requestLogService = requestLogService;
         this.validationService = validationService;
-        this.timestampSupplier = validationService.requirePresent(timestampSupplier, "timestampSupplier");
+        this.timestampSupplier = Instant::now;
     }
 
     @Override

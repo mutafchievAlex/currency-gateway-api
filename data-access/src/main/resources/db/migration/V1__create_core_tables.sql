@@ -5,7 +5,7 @@ CREATE TABLE exchange_rates (
     base_currency VARCHAR(3) NOT NULL,
     target_currency VARCHAR(3) NOT NULL,
     rate NUMERIC(19, 6) NOT NULL,
-    recorded_at TIMESTAMPTZ NOT NULL,
+    timestamp TIMESTAMPTZ NOT NULL,
     CONSTRAINT uk_exchange_rates_pair_timestamp UNIQUE (base_currency, target_currency, recorded_at)
 );
 
@@ -28,9 +28,9 @@ CREATE TABLE statistics_entries (
     id BIGSERIAL PRIMARY KEY,
     metric_name VARCHAR(100) NOT NULL,
     metric_value NUMERIC(19, 6) NOT NULL,
-    recorded_at TIMESTAMPTZ NOT NULL,
-    CONSTRAINT uk_statistics_entries_metric_timestamp UNIQUE (metric_name, recorded_at)
+    timestamp TIMESTAMPTZ NOT NULL,
+    CONSTRAINT uk_statistics_entries_metric_timestamp UNIQUE (metric_name, timestamp)
 );
 
 CREATE INDEX idx_statistics_entries_metric ON statistics_entries (metric_name);
-CREATE INDEX idx_statistics_entries_recorded_at ON statistics_entries (recorded_at);
+CREATE INDEX idx_statistics_entries_recorded_at ON statistics_entries (timestamp);
