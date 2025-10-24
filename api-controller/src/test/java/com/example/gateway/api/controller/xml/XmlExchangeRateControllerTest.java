@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
@@ -56,12 +57,13 @@ class XmlExchangeRateControllerTest {
                 .targetCurrency("EUR")
                 .rate("0.9200")
                 .timestamp(OffsetDateTime.ofInstant(ExchangeRateTestFixtures.TIMESTAMP, ZoneOffset.UTC));
-        when(exchangeRateQueryService.getCurrentRate("req-123", "/api/exchange-rates/current", "usd", "eur"))
+        UUID requestId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        when(exchangeRateQueryService.getCurrentRate(requestId, "/api/exchange-rates/current", "usd", "eur"))
                 .thenReturn(rate);
         when(xmlApiMapper.toExchangeRateResponse(rate)).thenReturn(response);
 
         mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
+                        .queryParam("requestId", requestId.toString())
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_XML))
@@ -75,11 +77,12 @@ class XmlExchangeRateControllerTest {
 
     @Test
     void returnsNotFoundWhenCurrentRateMissing() throws Exception {
-        when(exchangeRateQueryService.getCurrentRate("req-123", "/api/exchange-rates/current", "usd", "eur"))
+        UUID requestId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+        when(exchangeRateQueryService.getCurrentRate(requestId, "/api/exchange-rates/current", "usd", "eur"))
                 .thenThrow(new ExchangeRateNotFoundException("USD", "EUR"));
 
         mockMvc.perform(get("/api/exchange-rates/current")
-                        .queryParam("requestId", "req-123")
+                        .queryParam("requestId", requestId.toString())
                         .queryParam("baseCurrency", "usd")
                         .queryParam("targetCurrency", "eur")
                         .accept(MediaType.APPLICATION_XML))
@@ -88,11 +91,12 @@ class XmlExchangeRateControllerTest {
 
         @Test
         void returnsBadRequestWhenMandatoryValueMissing() throws Exception {
-            when(exchangeRateQueryService.getCurrentRate("req-123", "/api/exchange-rates/current", "usd", "eur"))
+            UUID requestId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+            when(exchangeRateQueryService.getCurrentRate(requestId, "/api/exchange-rates/current", "usd", "eur"))
                     .thenThrow(new MissingRequiredValueException("baseCurrency must not be null"));
 
             mockMvc.perform(get("/api/exchange-rates/current")
-                            .queryParam("requestId", "req-123")
+                            .queryParam("requestId", requestId.toString())
                             .queryParam("baseCurrency", "usd")
                             .queryParam("targetCurrency", "eur")
                             .accept(MediaType.APPLICATION_XML))
@@ -116,13 +120,14 @@ class XmlExchangeRateControllerTest {
                     .timestamp(OffsetDateTime.ofInstant(scenario.end().minus(1, java.time.temporal.ChronoUnit.HOURS), ZoneOffset.UTC));
             ExchangeRateHistoryResponse historyResponse = new ExchangeRateHistoryResponse()
                     .rates(List.of(firstRate, secondRate));
-            when(exchangeRateQueryService.getHistory("req-456", "/api/exchange-rates/history", "usd", "jpy",
+            UUID requestId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+            when(exchangeRateQueryService.getHistory(requestId, "/api/exchange-rates/history", "usd", "jpy",
                     scenario.start().atOffset(java.time.ZoneOffset.UTC),
                     scenario.end().atOffset(java.time.ZoneOffset.UTC))).thenReturn(scenario.rates());
             when(xmlApiMapper.toHistoryResponse(anyList())).thenReturn(historyResponse);
 
             mockMvc.perform(get("/api/exchange-rates/history")
-                            .queryParam("requestId", "req-456")
+                            .queryParam("requestId", requestId.toString())
                             .queryParam("baseCurrency", "usd")
                             .queryParam("targetCurrency", "jpy")
                             .queryParam("start", scenario.start().toString())
@@ -136,13 +141,14 @@ class XmlExchangeRateControllerTest {
 
         @Test
         void rejectsInvalidHistoryRange() throws Exception {
-            when(exchangeRateQueryService.getHistory("req-456", "/api/exchange-rates/history", "usd", "jpy",
+            UUID requestId = UUID.fromString("44444444-4444-4444-4444-444444444444");
+            when(exchangeRateQueryService.getHistory(requestId, "/api/exchange-rates/history", "usd", "jpy",
                     ExchangeRateTestFixtures.TIMESTAMP.atOffset(java.time.ZoneOffset.UTC),
                     ExchangeRateTestFixtures.TIMESTAMP.minusSeconds(60).atOffset(java.time.ZoneOffset.UTC)))
                     .thenThrow(new InvalidExchangeRateQueryException("start must be before or equal to end"));
 
             mockMvc.perform(get("/api/exchange-rates/history")
-                            .queryParam("requestId", "req-456")
+                            .queryParam("requestId", requestId.toString())
                             .queryParam("baseCurrency", "usd")
                             .queryParam("targetCurrency", "jpy")
                             .queryParam("start", ExchangeRateTestFixtures.TIMESTAMP.toString())

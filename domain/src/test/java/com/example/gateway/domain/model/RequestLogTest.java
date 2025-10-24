@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -19,9 +20,10 @@ class RequestLogTest {
     @DisplayName("constructor stores all values")
     void constructorStoresValues() {
         Instant timestamp = Instant.parse("2024-01-01T00:00:00Z");
-        RequestLog log = new RequestLog("id-1", "/rates", "GET", timestamp);
+        UUID requestId = UUID.fromString("55555555-5555-5555-5555-555555555555");
+        RequestLog log = new RequestLog(requestId, "/rates", "GET", timestamp);
 
-        assertEquals("id-1", log.getRequestId());
+        assertEquals(requestId, log.getRequestId());
         assertEquals("/rates", log.getEndpoint());
         assertEquals("GET", log.getHttpMethod());
         assertSame(timestamp, log.getTimestamp());

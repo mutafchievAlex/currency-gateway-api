@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "/api/exchange-rates", produces = org.springframework.http.MediaType.APPLICATION_XML_VALUE)
@@ -33,7 +34,7 @@ public class XmlExchangeRateController implements XmlExchangeRatesApi {
     }
 
     @Override
-    public ResponseEntity<ExchangeRateResponse> getCurrentExchangeRate(String requestId,
+    public ResponseEntity<ExchangeRateResponse> getCurrentExchangeRate(UUID requestId,
                                                                        String baseCurrency,
                                                                        String targetCurrency) {
         ExchangeRate rate = exchangeRateQueryService.getCurrentRate(requestId, CURRENT_ENDPOINT, baseCurrency, targetCurrency);
@@ -44,7 +45,7 @@ public class XmlExchangeRateController implements XmlExchangeRatesApi {
     }
 
     @Override
-    public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(String requestId,
+    public ResponseEntity<ExchangeRateHistoryResponse> getExchangeRateHistory(UUID requestId,
                                                                               String baseCurrency,
                                                                               String targetCurrency,
                                                                               OffsetDateTime start,

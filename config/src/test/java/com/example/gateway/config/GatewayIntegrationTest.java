@@ -2,7 +2,10 @@ package com.example.gateway.config;
 
 import com.example.gateway.CurrencyGatewayApplication;
 import com.example.gateway.api.json.generated.model.ApiErrorResponse;
-import com.example.gateway.api.json.generated.model.ExchangeRateResponse;
+import com.example.gateway.api.json.generated.model.JsonClientMetadata;
+import com.example.gateway.api.json.generated.model.JsonCurrencyPair;
+import com.example.gateway.api.json.generated.model.JsonCurrentRequest;
+import com.example.gateway.api.json.generated.model.JsonCurrentResponse;
 import com.example.gateway.api.xml.generated.model.ExchangeRateHistoryResponse;
 import com.example.gateway.domain.model.StatisticsEntry;
 import com.example.gateway.domain.service.StatisticsCollectorService;
@@ -36,6 +39,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -86,22 +91,32 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         exchangeRateRepository.save(new ExchangeRateEntity(1L,"USD", "EUR", new BigDecimal("0.90"), now.minusSeconds(60)));
         exchangeRateRepository.save(new ExchangeRateEntity(2L,"USD", "EUR", new BigDecimal("0.95"), now));
 
-        String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
-                .queryParam("requestId", "json-req-1")
-                .queryParam("baseCurrency", "USD")
-                .queryParam("targetCurrency", "EUR")
-                .toUriString();
+        OffsetDateTime requestedAt = OffsetDateTime.ofInstant(now, ZoneOffset.UTC);
+        UUID requestId = UUID.fromString("99999999-9999-9999-9999-999999999999");
+        JsonCurrentRequest request = new JsonCurrentRequest()
+                .requestId(requestId)
+                .timestamp(requestedAt)
+                .client(new JsonClientMetadata().id("integration-test"))
+                .currency(new JsonCurrencyPair().base("USD").target("EUR"));
 
-        ResponseEntity<ExchangeRateResponse> response = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        ResponseEntity<JsonCurrentResponse> response = restTemplate.postForEntity(
+                "/json_api/current",
+                new HttpEntity<>(request, headers),
+                JsonCurrentResponse.class
+        );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getBaseCurrency()).isEqualTo("USD");
-        assertThat(response.getBody().getTargetCurrency()).isEqualTo("EUR");
-        assertThat(response.getBody().getRate()).isEqualTo("0.95");
-        assertThat(response.getBody().getTimestamp()).isNotNull();
-        assertThat(response.getBody().getTimestamp().toInstant()).isEqualTo(now);
-        assertThat(requestLogRepository.findByRequestId("json-req-1")).isPresent();
+        assertThat(response.getBody().getCurrency().getBase()).isEqualTo("USD");
+        assertThat(response.getBody().getCurrency().getTarget()).isEqualTo("EUR");
+        assertThat(response.getBody().getQuote().getRate()).isEqualTo("0.95");
+        assertThat(response.getBody().getQuote().getTimestamp()).isNotNull();
+        assertThat(response.getBody().getQuote().getTimestamp().toInstant()).isEqualTo(now);
+        assertThat(requestLogRepository.findByRequestId(requestId)).isPresent();
     }
 
     @Test
@@ -114,8 +129,9 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         exchangeRateRepository.save(new ExchangeRateEntity(4L,"USD", "EUR", new BigDecimal("0.92"), second));
         exchangeRateRepository.save(new ExchangeRateEntity(5L,"USD", "EUR", new BigDecimal("0.93"), third));
 
+        UUID xmlRequestId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/history")
-                .queryParam("requestId", "xml-req-1")
+                .queryParam("requestId", xmlRequestId)
                 .queryParam("baseCurrency", "usd")
                 .queryParam("targetCurrency", "eur")
                 .queryParam("start", first.minusSeconds(5))
@@ -133,7 +149,7 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(requestLogRepository.findByRequestId("xml-req-1")).isPresent();
+        assertThat(requestLogRepository.findByRequestId(xmlRequestId)).isPresent();
 
         ExchangeRateHistoryResponse historyResponse = response.getBody();
         assertThat(historyResponse).isNotNull();
@@ -148,19 +164,33 @@ class GatewayIntegrationTest extends IntegrationTestSupport {
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         exchangeRateRepository.save(new ExchangeRateEntity(1L,"USD", "GBP", new BigDecimal("0.80"), now));
 
-        String uri = UriComponentsBuilder.fromPath("/api/exchange-rates/current")
-                .queryParam("requestId", "dup-req-1")
-                .queryParam("baseCurrency", "USD")
-                .queryParam("targetCurrency", "GBP")
-                .toUriString();
+        OffsetDateTime requestedAt = OffsetDateTime.ofInstant(now, ZoneOffset.UTC);
+        UUID duplicateRequestId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        JsonCurrentRequest request = new JsonCurrentRequest()
+                .requestId(duplicateRequestId)
+                .timestamp(requestedAt)
+                .client(new JsonClientMetadata().id("integration-test"))
+                .currency(new JsonCurrencyPair().base("USD").target("GBP"));
 
-        ResponseEntity<ExchangeRateResponse> firstResponse = restTemplate.getForEntity(uri, ExchangeRateResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        ResponseEntity<JsonCurrentResponse> firstResponse = restTemplate.postForEntity(
+                "/json_api/current",
+                new HttpEntity<>(request, headers),
+                JsonCurrentResponse.class
+        );
         assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        ResponseEntity<ApiErrorResponse> duplicateResponse = restTemplate.getForEntity(uri, ApiErrorResponse.class);
+        ResponseEntity<ApiErrorResponse> duplicateResponse = restTemplate.postForEntity(
+                "/json_api/current",
+                new HttpEntity<>(request, headers),
+                ApiErrorResponse.class
+        );
         assertThat(duplicateResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(duplicateResponse.getBody()).isNotNull();
-        assertThat(duplicateResponse.getBody().getMessage()).contains("dup-req-1");
+        assertThat(duplicateResponse.getBody().getMessage()).contains(duplicateRequestId.toString());
     }
 
     @Test

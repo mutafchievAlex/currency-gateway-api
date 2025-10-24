@@ -12,6 +12,7 @@ import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,7 +32,7 @@ class PersistenceMappersTest {
 
     @Test
     void roundTripsRequestLog() {
-        RequestLog domain = new RequestLog("id-1", "/endpoint", "GET", Instant.parse("2024-01-01T00:01:00Z"));
+        RequestLog domain = new RequestLog(UUID.fromString("55555555-5555-5555-5555-555555555555"), "/endpoint", "GET", Instant.parse("2024-01-01T00:01:00Z"));
 
         RequestLogEntity entity = mapper.toEntity(domain);
         RequestLog mappedBack = mapper.toDomain(entity);

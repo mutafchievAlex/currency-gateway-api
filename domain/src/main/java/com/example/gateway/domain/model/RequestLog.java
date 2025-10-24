@@ -5,14 +5,15 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Captures the essential details of an incoming request processed by the gateway.
  */
 public final class RequestLog {
 
-    @NotBlank
-    private String requestId;
+    @NotNull
+    private UUID requestId;
 
     @NotBlank
     private String endpoint;
@@ -23,21 +24,21 @@ public final class RequestLog {
     @NotNull
     private Instant timestamp;
 
-    public RequestLog(String requestId,
+    public RequestLog(UUID requestId,
                       String endpoint,
                       String httpMethod,
                       Instant timestamp) {
-        this.requestId = normalize(requestId);
+        this.requestId = requestId;
         this.endpoint = normalize(endpoint);
         this.httpMethod = normalize(httpMethod);
         this.timestamp = timestamp;
     }
 
-    public String getRequestId() {
+    public UUID getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(String requestId) {
+    public void setRequestId(UUID requestId) {
         this.requestId = requestId;
     }
 

@@ -1,26 +1,28 @@
 openapi: 3.0.3
 info:
   title: Currency Gateway JSON API
-  version: 1.0.0
-  description: JSON endpoints for exchange rate data
+  version: 1.1.0
+  description: JSON endpoints for exchange rate data backed by Fixer
 paths:
-  /api/exchange-rates/current:
-    get:
+  /json_api/current:
+    post:
       tags:
         - JsonExchangeRates
       operationId: getCurrentExchangeRate
-      summary: Get the latest exchange rate for a currency pair
-      parameters:
-        - $ref: '#/components/parameters/RequestId'
-        - $ref: '#/components/parameters/BaseCurrency'
-        - $ref: '#/components/parameters/TargetCurrency'
+      summary: Retrieve the latest Fixer exchange rate for a currency pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonCurrentRequest'
       responses:
         '200':
           description: Successful JSON exchange rate response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExchangeRateResponse'
+                $ref: '#/components/schemas/JsonCurrentResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -29,25 +31,25 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/exchange-rates/history:
-    get:
+  /json_api/history:
+    post:
       tags:
         - JsonExchangeRates
       operationId: getExchangeRateHistory
-      summary: Get historical exchange rates for a currency pair
-      parameters:
-        - $ref: '#/components/parameters/RequestId'
-        - $ref: '#/components/parameters/BaseCurrency'
-        - $ref: '#/components/parameters/TargetCurrency'
-        - $ref: '#/components/parameters/Start'
-        - $ref: '#/components/parameters/End'
+      summary: Retrieve a Fixer exchange rate history window for a currency pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonHistoryRequest'
       responses:
         '200':
           description: Historical exchange rate response in JSON
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExchangeRateHistoryResponse'
+                $ref: '#/components/schemas/JsonHistoryResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -57,49 +59,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
-  parameters:
-    RequestId:
-      name: requestId
-      in: query
-      required: true
-      schema:
-        type: string
-        minLength: 1
-      description: Unique identifier for the request
-    BaseCurrency:
-      name: baseCurrency
-      in: query
-      required: true
-      schema:
-        type: string
-        minLength: 3
-        maxLength: 3
-      description: ISO-4217 currency code representing the base currency
-    TargetCurrency:
-      name: targetCurrency
-      in: query
-      required: true
-      schema:
-        type: string
-        minLength: 3
-        maxLength: 3
-      description: ISO-4217 currency code representing the target currency
-    Start:
-      name: start
-      in: query
-      required: true
-      schema:
-        type: string
-        format: date-time
-      description: Inclusive starting timestamp for history lookup
-    End:
-      name: end
-      in: query
-      required: true
-      schema:
-        type: string
-        format: date-time
-      description: Inclusive ending timestamp for history lookup
   responses:
     BadRequest:
       description: Invalid request parameters
@@ -126,33 +85,176 @@ components:
           schema:
             $ref: '#/components/schemas/ApiErrorResponse'
   schemas:
-    ExchangeRateResponse:
+    JsonClientMetadata:
       type: object
       required:
-        - baseCurrency
-        - targetCurrency
+        - id
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Unique identifier for the consuming client
+        name:
+          type: string
+          maxLength: 256
+          description: Human friendly name for the client application
+        version:
+          type: string
+          maxLength: 64
+          description: Optional semantic version of the client application
+    JsonCurrencyPair:
+      type: object
+      required:
+        - base
+        - target
+      properties:
+        base:
+          type: string
+          minLength: 3
+          maxLength: 3
+          pattern: '^[A-Z]{3}$'
+          description: ISO-4217 currency code representing the base currency
+        target:
+          type: string
+          minLength: 3
+          maxLength: 3
+          pattern: '^[A-Z]{3}$'
+          description: ISO-4217 currency code representing the target currency
+    JsonHistoryPeriod:
+      type: object
+      required:
+        - amount
+        - unit
+      properties:
+        amount:
+          type: integer
+          minimum: 1
+          maximum: 720
+          description: Positive quantity of the selected period unit to look back from the timestamp
+        unit:
+          type: string
+          description: Period unit used to calculate the history window
+          enum:
+            - MINUTES
+            - HOURS
+            - DAYS
+    JsonQuote:
+      type: object
+      required:
+        - provider
         - rate
         - timestamp
       properties:
-        baseCurrency:
+        provider:
           type: string
-        targetCurrency:
-          type: string
+          enum:
+            - Fixer
+          description: Upstream data provider responsible for the exchange rate
         rate:
           type: string
           pattern: "^-?\\d+(?:\\.\\d+)?$"
+          description: Decimal exchange rate quoted by the provider
         timestamp:
           type: string
           format: date-time
-    ExchangeRateHistoryResponse:
+          description: Timestamp reported by the Fixer provider for the quote
+    JsonCurrentRequest:
       type: object
       required:
-        - rates
+        - requestId
+        - timestamp
+        - client
+        - currency
       properties:
-        rates:
+        requestId:
+          type: string
+          format: uuid
+          description: Unique identifier supplied by the caller for idempotency guarantees
+        timestamp:
+          type: string
+          format: date-time
+          description: Client generated timestamp for the request
+        client:
+          $ref: '#/components/schemas/JsonClientMetadata'
+        currency:
+          $ref: '#/components/schemas/JsonCurrencyPair'
+    JsonHistoryRequest:
+      allOf:
+        - $ref: '#/components/schemas/JsonCurrentRequest'
+        - type: object
+          required:
+            - period
+          properties:
+            period:
+              $ref: '#/components/schemas/JsonHistoryPeriod'
+    JsonHistoryWindow:
+      type: object
+      required:
+        - start
+        - end
+      properties:
+        start:
+          type: string
+          format: date-time
+          description: Inclusive start timestamp of the history window derived from the request period
+        end:
+          type: string
+          format: date-time
+          description: Inclusive end timestamp of the history window matching the request timestamp
+    JsonCurrentResponse:
+      type: object
+      required:
+        - requestId
+        - requestedAt
+        - client
+        - currency
+        - quote
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        requestedAt:
+          type: string
+          format: date-time
+          description: Echo of the client supplied timestamp
+        client:
+          $ref: '#/components/schemas/JsonClientMetadata'
+        currency:
+          $ref: '#/components/schemas/JsonCurrencyPair'
+        quote:
+          $ref: '#/components/schemas/JsonQuote'
+    JsonHistoryResponse:
+      type: object
+      required:
+        - requestId
+        - requestedAt
+        - client
+        - currency
+        - period
+        - window
+        - quotes
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        requestedAt:
+          type: string
+          format: date-time
+          description: Echo of the client supplied timestamp
+        client:
+          $ref: '#/components/schemas/JsonClientMetadata'
+        currency:
+          $ref: '#/components/schemas/JsonCurrencyPair'
+        period:
+          $ref: '#/components/schemas/JsonHistoryPeriod'
+        window:
+          $ref: '#/components/schemas/JsonHistoryWindow'
+        quotes:
           type: array
+          minItems: 1
           items:
-            $ref: '#/components/schemas/ExchangeRateResponse'
+            $ref: '#/components/schemas/JsonQuote'
     ApiErrorResponse:
       type: object
       required:

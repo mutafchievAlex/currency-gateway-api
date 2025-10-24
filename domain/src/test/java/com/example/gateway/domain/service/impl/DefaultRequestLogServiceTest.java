@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,7 +39,7 @@ class DefaultRequestLogServiceTest {
 
     @BeforeEach
     void setUp() {
-        log = new RequestLog("req-1", "/rates", "GET", Instant.parse("2024-03-15T10:15:30Z"));
+        log = new RequestLog(UUID.fromString("66666666-6666-6666-6666-666666666666"), "/rates", "GET", Instant.parse("2024-03-15T10:15:30Z"));
         when(validationService.requireValid(any(), anyString())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
