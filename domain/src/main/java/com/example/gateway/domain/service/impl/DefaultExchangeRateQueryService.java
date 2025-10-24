@@ -1,6 +1,5 @@
 package com.example.gateway.domain.service.impl;
 
-import com.example.gateway.domain.validation.ValidationUtils;
 import com.example.gateway.domain.exception.InvalidExchangeRateQueryException;
 import com.example.gateway.domain.model.ExchangeRate;
 import com.example.gateway.domain.model.RequestLog;
@@ -8,12 +7,14 @@ import com.example.gateway.domain.service.ExchangeRateQueryService;
 import com.example.gateway.domain.service.ExchangeRateService;
 import com.example.gateway.domain.service.RequestLogService;
 import com.example.gateway.domain.validation.BeanValidationService;
+import com.example.gateway.domain.validation.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
@@ -23,6 +24,7 @@ import java.util.function.Supplier;
 public class DefaultExchangeRateQueryService implements ExchangeRateQueryService {
 
     private static final String HTTP_METHOD_GET = "GET";
+    private static final String HTTP_METHOD_POST = "POST";
 
     private final ExchangeRateService exchangeRateService;
     private final RequestLogService requestLogService;
@@ -40,11 +42,58 @@ public class DefaultExchangeRateQueryService implements ExchangeRateQueryService
     }
 
     @Override
-    public ExchangeRate getCurrentRate(String requestId,
+    public ExchangeRate getCurrentRate(UUID requestId,
                                        String endpoint,
                                        String baseCurrency,
                                        String targetCurrency) {
-        recordRequest(requestId, endpoint);
+        Instant timestamp = timestampSupplier.get();
+        return getCurrentRateInternal(requestId, endpoint, HTTP_METHOD_GET, timestamp, baseCurrency, targetCurrency);
+    }
+
+    @Override
+    public ExchangeRate getCurrentRate(UUID requestId,
+                                       String endpoint,
+                                       Instant requestTimestamp,
+                                       String clientId,
+                                       String baseCurrency,
+                                       String targetCurrency) {
+        Instant safeTimestamp = validationService.requirePresent(requestTimestamp, "timestamp");
+        ValidationUtils.requireTrimmedNotBlank(clientId, "client.id");
+        return getCurrentRateInternal(requestId, endpoint, HTTP_METHOD_POST, safeTimestamp, baseCurrency, targetCurrency);
+    }
+
+    @Override
+    public List<ExchangeRate> getHistory(UUID requestId,
+                                         String endpoint,
+                                         String baseCurrency,
+                                         String targetCurrency,
+                                         OffsetDateTime start,
+                                         OffsetDateTime end) {
+        Instant timestamp = timestampSupplier.get();
+        return getHistoryInternal(requestId, endpoint, HTTP_METHOD_GET, timestamp, baseCurrency, targetCurrency, start, end);
+    }
+
+    @Override
+    public List<ExchangeRate> getHistory(UUID requestId,
+                                         String endpoint,
+                                         Instant requestTimestamp,
+                                         String clientId,
+                                         String baseCurrency,
+                                         String targetCurrency,
+                                         OffsetDateTime start,
+                                         OffsetDateTime end) {
+        Instant safeTimestamp = validationService.requirePresent(requestTimestamp, "timestamp");
+        ValidationUtils.requireTrimmedNotBlank(clientId, "client.id");
+        return getHistoryInternal(requestId, endpoint, HTTP_METHOD_POST, safeTimestamp, baseCurrency, targetCurrency, start, end);
+    }
+
+    private ExchangeRate getCurrentRateInternal(UUID requestId,
+                                                String endpoint,
+                                                String httpMethod,
+                                                Instant timestamp,
+                                                String baseCurrency,
+                                                String targetCurrency) {
+        recordRequest(requestId, endpoint, httpMethod, timestamp);
 
         String normalizedBase = ValidationUtils.normalizeCurrencyCode(baseCurrency, "baseCurrency");
         String normalizedTarget = ValidationUtils.normalizeCurrencyCode(targetCurrency, "targetCurrency");
@@ -52,14 +101,15 @@ public class DefaultExchangeRateQueryService implements ExchangeRateQueryService
         return exchangeRateService.getLatest(normalizedBase, normalizedTarget);
     }
 
-    @Override
-    public List<ExchangeRate> getHistory(String requestId,
-                                         String endpoint,
-                                         String baseCurrency,
-                                         String targetCurrency,
-                                         OffsetDateTime start,
-                                         OffsetDateTime end) {
-        recordRequest(requestId, endpoint);
+    private List<ExchangeRate> getHistoryInternal(UUID requestId,
+                                                  String endpoint,
+                                                  String httpMethod,
+                                                  Instant timestamp,
+                                                  String baseCurrency,
+                                                  String targetCurrency,
+                                                  OffsetDateTime start,
+                                                  OffsetDateTime end) {
+        recordRequest(requestId, endpoint, httpMethod, timestamp);
 
         OffsetDateTime safeStart = validationService.requirePresent(start, "start");
         OffsetDateTime safeEnd = validationService.requirePresent(end, "end");
@@ -77,9 +127,13 @@ public class DefaultExchangeRateQueryService implements ExchangeRateQueryService
         return exchangeRateService.findHistory(normalizedBase, normalizedTarget, startInstant, endInstant);
     }
 
-    private void recordRequest(String requestId, String endpoint) {
-        Instant timestamp = timestampSupplier.get();
-        RequestLog log = new RequestLog(requestId, endpoint, HTTP_METHOD_GET, timestamp);
+    private void recordRequest(UUID requestId,
+                               String endpoint,
+                               String httpMethod,
+                               Instant timestamp) {
+        UUID safeRequestId = validationService.requirePresent(requestId, "requestId");
+        Instant safeTimestamp = validationService.requirePresent(timestamp, "timestamp");
+        RequestLog log = new RequestLog(safeRequestId, endpoint, httpMethod, safeTimestamp);
         requestLogService.record(log);
     }
 }

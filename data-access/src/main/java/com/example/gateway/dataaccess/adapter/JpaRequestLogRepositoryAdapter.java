@@ -8,6 +8,7 @@ import com.example.gateway.dataaccess.repository.RequestLogRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class JpaRequestLogRepositoryAdapter implements RequestLogRepositoryPort {
@@ -21,7 +22,7 @@ public class JpaRequestLogRepositoryAdapter implements RequestLogRepositoryPort 
     }
 
     @Override
-    public Optional<RequestLog> findByRequestId(String requestId) {
+    public Optional<RequestLog> findByRequestId(UUID requestId) {
         return repository.findByRequestId(requestId)
                 .map(mapper::toDomain);
     }

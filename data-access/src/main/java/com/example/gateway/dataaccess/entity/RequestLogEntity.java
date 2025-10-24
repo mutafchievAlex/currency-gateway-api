@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.Instant;
+import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,9 +34,9 @@ public class RequestLogEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    @NotNull
     @Column(name = "request_id", nullable = false, unique = true)
-    private String requestId;
+    private UUID requestId;
 
     @NotBlank
     @Column(name = "endpoint", nullable = false)
